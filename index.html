@@ -63,6 +63,33 @@
             align-items: center;
             gap: 0.75rem;
         }
+        
+        /* Edit Mode Styles */
+        .edit-btn {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .editable-section:hover .edit-btn {
+            display: flex;
+        }
+        body.edit-mode .editable-section {
+            position: relative;
+            border: 2px dashed #3b82f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -72,8 +99,11 @@
         <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
             <div class="container mx-auto flex justify-between items-center p-4">
                 <a href="#" data-page="home" class="nav-link flex items-center gap-2 text-2xl font-bold gold-text">
-                    <svg class="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    <svg class="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 12c0 5.523-4.477 10-10 10" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 2C14.5367 4.29332 16 7.46422 16 11V12" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 22C9.46329 19.7067 8 16.5358 8 13V12" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     <span>Srian Foundation</span>
                 </a>
@@ -135,11 +165,12 @@
         <!-- Hero Section -->
         <section class="hero-section bg-gradient-to-br from-blue-50 to-yellow-50 relative overflow-hidden">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-between py-20 md:py-32 px-4 text-center md:text-left">
-                <div class="md:w-1/2 z-10">
+                <div class="md:w-1/2 z-10 editable-section" data-content-key="hero">
+                    <button class="edit-btn" data-edit-key="hero"><i class="fas fa-pencil-alt"></i></button>
                     <h1 id="hero-title" class="hero-title text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">
                         Your Kindness Writes Their Future ✨
                     </h1>
-                    <p class="hero-p mt-6 text-lg md:text-xl max-w-xl mx-auto md:mx-0 text-gray-600">
+                    <p id="hero-subtitle" class="hero-p mt-6 text-lg md:text-xl max-w-xl mx-auto md:mx-0 text-gray-600">
                         For years, our community of supporters has been the driving force behind our mission to feed and educate. Join us in continuing this legacy of hope.
                     </p>
                     <div class="mt-10 hero-btn">
@@ -149,7 +180,7 @@
                     </div>
                 </div>
                 <div class="md:w-1/2 mt-12 md:mt-0 z-10 hero-img">
-                    <img id="hero-image" src="https://ik.imagekit.io/gmxabb1dm/Download%20Donation%20box%20and%20charity%20concept_%20Human%20hands%20putting%20money%20cash%20love%20and%20heart%20to%20donation%20box%20together%20helping%20doing%20charity%20vector%20illustration%20for%20free.jpeg?updatedAt=1753799288747" alt="A child studying happily" class="rounded-2xl shadow-2xl w-full" />
+                    <img id="hero-image" src="https://placehold.co/600x400/e0f7fa/333?text=Our+Mission" alt="A child studying happily" class="rounded-2xl shadow-2xl w-full" />
                 </div>
             </div>
             <div class="floating-icons absolute top-0 left-0 w-full h-full"></div>
@@ -158,20 +189,25 @@
         <!-- Our Mission Section -->
         <section class="py-20 bg-gray-50">
             <div class="container mx-auto px-4 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">An Enduring Commitment 💖</h2>
-                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-                    Our work is built on a simple principle: every act of kindness matters. We focus on two core pillars to create lasting change.
-                </p>
+                <div class="editable-section" data-content-key="mission">
+                    <button class="edit-btn" data-edit-key="mission"><i class="fas fa-pencil-alt"></i></button>
+                    <h2 id="mission-title" class="text-3xl md:text-4xl font-bold text-gray-800">An Enduring Commitment 💖</h2>
+                    <p id="mission-subtitle" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        Our work is built on a simple principle: every act of kindness matters. We focus on two core pillars to create lasting change.
+                    </p>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12 max-w-4xl mx-auto">
-                    <div class="bg-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="bg-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300 editable-section" data-content-key="pillar1">
+                         <button class="edit-btn" data-edit-key="pillar1"><i class="fas fa-pencil-alt"></i></button>
                         <i class="fas fa-utensils text-4xl text-blue-500 mb-4"></i>
-                        <h3 class="text-2xl font-bold text-gray-800">Food for the Soul 🍲</h3>
-                        <p class="text-gray-600 mt-2">Providing warm, nutritious meals to children and the homeless has always been at the heart of what we do.</p>
+                        <h3 id="mission-pillar1-title" class="text-2xl font-bold text-gray-800">Food for the Soul 🍲</h3>
+                        <p id="mission-pillar1-text" class="text-gray-600 mt-2">Providing warm, nutritious meals to children and the homeless has always been at the heart of what we do.</p>
                     </div>
-                    <div class="bg-yellow-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300">
+                    <div class="bg-yellow-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300 editable-section" data-content-key="pillar2">
+                         <button class="edit-btn" data-edit-key="pillar2"><i class="fas fa-pencil-alt"></i></button>
                         <i class="fas fa-graduation-cap text-4xl text-yellow-500 mb-4"></i>
-                        <h3 class="text-2xl font-bold text-gray-800">Opening Doors Through Education 🎓</h3>
-                        <p class="text-gray-600 mt-2">We believe in the power of education to break the cycle of poverty and unlock a brighter future for intelligent students.</p>
+                        <h3 id="mission-pillar2-title" class="text-2xl font-bold text-gray-800">Opening Doors Through Education 🎓</h3>
+                        <p id="mission-pillar2-text" class="text-gray-600 mt-2">We believe in the power of education to break the cycle of poverty and unlock a brighter future for intelligent students.</p>
                     </div>
                 </div>
             </div>
@@ -191,11 +227,23 @@
         <div class="py-20 bg-gray-50 min-h-screen">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Our Wall of Heroes ⭐</h1>
+                    <h1 id="donors-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Our Wall of Heroes ⭐</h1>
                     <p class="mt-4 text-lg text-gray-600">A heartfelt thank you to every single person who has contributed to our cause.</p>
                 </div>
-                <div id="donors-list-container" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-                    <!-- Donors list will be rendered here -->
+                
+                <!-- Top 3 Donors Section -->
+                <div id="top-donors-highlight" class="mb-20">
+                    <!-- Top donors will be rendered here by JS -->
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">All Supporters</h2>
+                    <div class="mb-8">
+                        <input type="text" id="donor-search" placeholder="Search for a supporter..." class="p-3 border rounded-lg w-full transition" />
+                    </div>
+                    <div id="donors-list-container" class="bg-white rounded-2xl shadow-lg p-8">
+                        <!-- Rest of the donors list will be rendered here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -205,8 +253,11 @@
         <div class="py-20 bg-white min-h-screen">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Moments We Cherish 📸</h1>
+                    <h1 id="gallery-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Moments We Cherish 📸</h1>
                     <p class="mt-4 text-lg text-gray-600">Moments of joy and hope, made possible by you.</p>
+                </div>
+                 <div class="max-w-xl mx-auto mb-12">
+                    <input type="text" id="gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full transition" />
                 </div>
                 <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <!-- Gallery images will be rendered here -->
@@ -219,12 +270,12 @@
         <div class="py-20 bg-white">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800">The Heart of Our Mission ❤️</h1>
+                    <h1 id="about-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">The Heart of Our Mission ❤️</h1>
                     <p class="mt-4 text-lg text-gray-600">Learn more about who we are and what we do.</p>
                 </div>
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16">
                     <div class="w-full md:w-1/2">
-                        <img src="https://ik.imagekit.io/gmxabb1dm/20250729_2013_Srian%20Foundation%20Poster_simple_compose_01k1ba5pqgfwgbs4gpbmyahk7r.png?updatedAt=1753800313508" alt="Our Team" class="rounded-lg shadow-xl w-full h-auto" />
+                        <img src="https://placehold.co/600x400/3B82F6/FFFFFF?text=Our+Team" alt="Our Team" class="rounded-lg shadow-xl w-full h-auto" />
                     </div>
                     <div class="w-full md:w-1/2">
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">Driven by Compassion</h2>
@@ -244,7 +295,7 @@
         <div class="py-20 bg-gray-50">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Let's Connect 🤝</h1>
+                    <h1 id="contact-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Let's Connect 🤝</h1>
                     <p class="mt-4 text-lg text-gray-600">We'd love to hear from you. Send us a message below.</p>
                 </div>
                 <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
@@ -407,19 +458,8 @@
             container.innerHTML = `
                 <div class="container mx-auto px-4 text-center">
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Voices from Our Community 📣</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                        <div class="bg-gray-50 p-8 rounded-2xl shadow-lg">
-                            <p class="text-gray-600 italic">"Seeing the live ticker of donations is so inspiring! It feels like being part of a big, kind family."</p>
-                            <p class="mt-4 font-bold">- Anjali P.</p>
-                        </div>
-                        <div class="bg-gray-50 p-8 rounded-2xl shadow-lg">
-                            <p class="text-gray-600 italic">"The transparency is amazing. I love seeing the photos in the gallery and knowing exactly where my contribution is going."</p>
-                            <p class="mt-4 font-bold">- Rohan S.</p>
-                        </div>
-                        <div class="bg-gray-50 p-8 rounded-2xl shadow-lg">
-                            <p class="text-gray-600 italic">"The easiest and most heartwarming donation I've ever made. The confetti after was a lovely touch!"</p>
-                            <p class="mt-4 font-bold">- Priya K.</p>
-                        </div>
+                    <div id="testimonials-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        <!-- Testimonials will be rendered here -->
                     </div>
                 </div>
             `;
@@ -490,21 +530,53 @@
                 const template = document.getElementById('template-donors');
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
-                const container = mainContent.querySelector('#donors-list-container');
-                container.innerHTML = `<p class="text-center text-gray-500">Loading donors...</p>`;
-                
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const donationsCollectionPath = `/artifacts/${appId}/public/data/donations`;
-                const q = query(collection(db, donationsCollectionPath));
+                const topDonorsContainer = mainContent.querySelector('#top-donors-highlight');
+                const restOfDonorsContainer = mainContent.querySelector('#donors-list-container');
+                let allDonors = [];
 
-                onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        container.innerHTML = `<p class="text-center text-gray-500">No donations yet. Be the first!</p>`;
+                const renderTopDonors = (topThree) => {
+                    if (topThree.length === 0) {
+                        topDonorsContainer.innerHTML = '';
                         return;
                     }
-                    const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
-                    container.innerHTML = `<div class="space-y-4">${sortedDocs.map((doc, index) => {
-                        const donor = doc.data();
+                    const medals = ['🥇', '🥈', '🥉'];
+                    topDonorsContainer.innerHTML = `
+                        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Our Top Supporters</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+                            ${topThree.map((donor, index) => {
+                                const initials = donor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                                const imageSrc = donor.imageUrl || `https://placehold.co/128x128/E0E7FF/3730A3?text=${initials}`;
+                                const orderClass = index === 1 ? 'md:order-1' : (index === 0 ? 'md:order-2' : 'md:order-3');
+                                const scaleClass = index === 0 ? 'md:scale-110' : '';
+
+                                return `
+                                    <div class="top-donor-card bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 ${orderClass} ${scaleClass}">
+                                        <div class="relative inline-block">
+                                            <img src="${imageSrc}" alt="${donor.name}" class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-md object-cover" />
+                                            <span class="absolute -top-2 -right-2 text-4xl">${medals[index]}</span>
+                                        </div>
+                                        <h3 class="text-2xl font-bold mt-4 text-gray-800">${donor.name}</h3>
+                                        <p class="text-lg font-semibold gold-text mt-1">₹${donor.amount.toLocaleString('en-IN')}</p>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                    gsap.from(".top-donor-card", {
+                        duration: 0.8,
+                        y: 50,
+                        opacity: 0,
+                        stagger: 0.2,
+                        ease: "power3.out"
+                    });
+                };
+
+                const renderDonorList = (donorsToRender) => {
+                    if (donorsToRender.length === 0) {
+                        restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">No other donors found.</p>`;
+                        return;
+                    }
+                    restOfDonorsContainer.innerHTML = `<div class="space-y-4">${donorsToRender.map((donor) => {
                         const date = donor.timestamp ? new Date(donor.timestamp.toDate()).toLocaleDateString() : 'N/A';
                         const initials = donor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                         const imageSrc = donor.imageUrl || `https://placehold.co/48x48/E0E7FF/3730A3?text=${initials}`;
@@ -519,11 +591,40 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-bold text-lg gold-text">₹${donor.amount}</p>
+                                    <p class="font-bold text-lg gold-text">₹${donor.amount.toLocaleString('en-IN')}</p>
                                     <p class="text-xs text-gray-400">${date}</p>
                                 </div>
                             </div>`;
                     }).join('')}</div>`;
+                };
+
+                const searchInput = document.getElementById('donor-search');
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredDonors = allDonors.filter(donor => donor.name.toLowerCase().includes(searchTerm));
+                    renderDonorList(filteredDonors);
+                });
+
+                restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">Loading donors...</p>`;
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const donationsCollectionPath = `/artifacts/${appId}/public/data/donations`;
+                const q = query(collection(db, donationsCollectionPath));
+
+                onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        topDonorsContainer.innerHTML = '';
+                        restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">No donations yet. Be the first!</p>`;
+                        return;
+                    }
+                    
+                    let fullDonorList = snapshot.docs.map(doc => doc.data());
+                    fullDonorList.sort((a, b) => b.amount - a.amount);
+                    
+                    const topThree = fullDonorList.slice(0, 3);
+                    allDonors = fullDonorList.slice(3);
+                    
+                    renderTopDonors(topThree);
+                    renderDonorList(allDonors);
                 });
             },
             gallery: () => {
@@ -625,9 +726,18 @@
                         </div>
                     </div>
 
+                    <!-- Manage Pledges Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Pledges</h2>
+                        <div id="admin-pledges-list" class="max-h-96 overflow-y-auto"></div>
+                    </div>
+
                     <!-- Manage Donors Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Donors</h2>
+                        <div class="mb-4">
+                            <input type="text" id="admin-donor-search" placeholder="Search donors..." class="p-3 border rounded-lg w-full" />
+                        </div>
                         <div id="admin-donors-list" class="max-h-96 overflow-y-auto mb-6"></div>
                         <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add New Donor</h3>
                         <form id="add-donor-form" class="space-y-4">
@@ -646,6 +756,9 @@
                     <!-- Manage Gallery Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Gallery</h2>
+                         <div class="mb-4">
+                            <input type="text" id="admin-gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full" />
+                        </div>
                         <div id="admin-gallery-list" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
                         <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add Gallery Image</h3>
                         <form id="add-gallery-form" class="space-y-4">
@@ -654,6 +767,37 @@
                                 <input type="text" name="location" placeholder="Location (e.g., Hyderabad)" class="p-3 border rounded-lg w-full" />
                             </div>
                             <button type="submit" class="bg-green-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-green-600 disabled:bg-gray-400">Add to Gallery</button>
+                        </form>
+                    </div>
+
+                    <!-- Manage Content Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Website Content</h2>
+                        <form id="content-form" class="space-y-6">
+                            <!-- Hero Section -->
+                            <div class="pb-6 border-b">
+                                <h3 class="text-xl font-semibold mb-2">Homepage Hero Section</h3>
+                                <input type="text" name="heroTitle" placeholder="Hero Title" class="p-3 border rounded-lg w-full mb-2" />
+                                <textarea name="heroSubtitle" placeholder="Hero Subtitle" class="p-3 border rounded-lg w-full h-24"></textarea>
+                            </div>
+                            <!-- Mission Section -->
+                            <div class="pb-6 border-b">
+                                <h3 class="text-xl font-semibold mb-2">Homepage Mission Section</h3>
+                                <input type="text" name="missionTitle" placeholder="Mission Title" class="p-3 border rounded-lg w-full mb-2" />
+                                <textarea name="missionSubtitle" placeholder="Mission Subtitle" class="p-3 border rounded-lg w-full h-24 mb-4"></textarea>
+                                <input type="text" name="pillar1Title" placeholder="Pillar 1 Title" class="p-3 border rounded-lg w-full mb-2" />
+                                <textarea name="pillar1Text" placeholder="Pillar 1 Text" class="p-3 border rounded-lg w-full h-20 mb-4"></textarea>
+                                <input type="text" name="pillar2Title" placeholder="Pillar 2 Title" class="p-3 border rounded-lg w-full mb-2" />
+                                <textarea name="pillar2Text" placeholder="Pillar 2 Text" class="p-3 border rounded-lg w-full h-20"></textarea>
+                            </div>
+                            <!-- Social Links -->
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Social Media Links</h3>
+                                <input type="url" name="facebook" placeholder="Facebook URL" class="p-3 border rounded-lg w-full mb-2" />
+                                <input type="url" name="twitter" placeholder="Twitter URL" class="p-3 border rounded-lg w-full mb-2" />
+                                <input type="url" name="instagram" placeholder="Instagram URL" class="p-3 border rounded-lg w-full" />
+                            </div>
+                            <button type="submit" class="bg-purple-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-purple-700">Save All Content</button>
                         </form>
                     </div>
                 </div>
@@ -721,10 +865,41 @@
                     button.textContent = 'Add to Gallery';
                 }
             });
+
+            // Content Form Logic
+            container.querySelector('#content-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const content = {
+                    heroTitle: form.heroTitle.value,
+                    heroSubtitle: form.heroSubtitle.value,
+                    missionTitle: form.missionTitle.value,
+                    missionSubtitle: form.missionSubtitle.value,
+                    pillar1Title: form.pillar1Title.value,
+                    pillar1Text: form.pillar1Text.value,
+                    pillar2Title: form.pillar2Title.value,
+                    pillar2Text: form.pillar2Text.value,
+                };
+                const socialLinks = {
+                    facebook: form.facebook.value,
+                    twitter: form.twitter.value,
+                    instagram: form.instagram.value,
+                };
+                
+                try {
+                    await setDoc(doc(db, "settings", "content"), content, { merge: true });
+                    await setDoc(doc(db, "settings", "socialLinks"), socialLinks, { merge: true });
+                    showModal('Website content updated successfully!');
+                } catch (error) {
+                    showModal('Error updating content: ' + error.message);
+                }
+            });
             
             // Load initial data for the dashboard
             loadAdminDonorsList();
             loadAdminGalleryList();
+            loadAdminPledgesList();
+            loadAdminContentForm();
         };
 
         const loadAdminDonorsList = () => {
@@ -735,13 +910,13 @@
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const donationsCollectionPath = `/artifacts/${appId}/public/data/donations`;
             const q = query(collection(db, donationsCollectionPath));
+            let allDonors = [];
 
-            onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    container.innerHTML = `<p class="text-center text-gray-500">No donors have been added yet.</p>`;
+            const renderTable = (donors) => {
+                 if (donors.length === 0) {
+                    container.innerHTML = `<p class="text-center text-gray-500">No donors found.</p>`;
                     return;
                 }
-                const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
                 container.innerHTML = `<table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b">
@@ -749,12 +924,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                    ${sortedDocs.map(doc => {
+                    ${donors.map(doc => {
                         const donor = doc.data();
                         return `
                         <tr class="border-b border-gray-100">
                             <td class="p-2">${donor.name}</td>
-                            <td class="p-2">₹${donor.amount}</td>
+                            <td class="p-2">₹${donor.amount.toLocaleString('en-IN')}</td>
                             <td class="p-2">
                                 <button data-id="${doc.id}" class="delete-donor-btn text-red-500 hover:text-red-700">Delete</button>
                             </td>
@@ -777,6 +952,18 @@
                         }
                     });
                 });
+            };
+
+            const searchInput = document.getElementById('admin-donor-search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredDonors = allDonors.filter(doc => doc.data().name.toLowerCase().includes(searchTerm));
+                renderTable(filteredDonors);
+            });
+
+            onSnapshot(q, (snapshot) => {
+                allDonors = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+                renderTable(allDonors);
             });
         };
         
@@ -788,14 +975,14 @@
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const galleryCollectionPath = `/artifacts/${appId}/public/data/gallery`;
             const q = query(collection(db, galleryCollectionPath));
+            let allImages = [];
 
-            onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
-                    container.innerHTML = `<p class="text-center text-gray-500 col-span-full">No images have been added yet.</p>`;
+            const renderGrid = (images) => {
+                if (images.length === 0) {
+                    container.innerHTML = `<p class="text-center text-gray-500 col-span-full">No images found.</p>`;
                     return;
                 }
-                const sortedDocs = snapshot.docs.sort((a, b) => b.data().createdAt - a.data().createdAt);
-                container.innerHTML = sortedDocs.map(doc => {
+                container.innerHTML = images.map(doc => {
                     const image = doc.data();
                     return `
                         <div class="relative group">
@@ -819,7 +1006,103 @@
                         }
                     });
                 });
+            };
+            
+            const searchInput = document.getElementById('admin-gallery-search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredImages = allImages.filter(doc => doc.data().location && doc.data().location.toLowerCase().includes(searchTerm));
+                renderGrid(filteredImages);
             });
+
+            onSnapshot(q, (snapshot) => {
+                allImages = snapshot.docs.sort((a, b) => b.data().createdAt - a.data().createdAt);
+                renderGrid(allImages);
+            });
+        };
+        
+        const loadAdminPledgesList = () => {
+            const container = document.getElementById('admin-pledges-list');
+            if (!container) return;
+            container.innerHTML = `<p class="text-center text-gray-500">Loading pledges...</p>`;
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const pledgesCollectionPath = `/artifacts/${appId}/public/data/pledges`;
+            const q = query(collection(db, pledgesCollectionPath));
+
+            onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-center text-gray-500">No pledges yet.</p>`;
+                    return;
+                }
+                const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+                container.innerHTML = `<table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="p-2">Name</th><th class="p-2">Phone</th><th class="p-2">Amount</th><th class="p-2">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    ${sortedDocs.map(doc => {
+                        const pledge = doc.data();
+                        return `
+                        <tr class="border-b border-gray-100">
+                            <td class="p-2">${pledge.name}</td>
+                            <td class="p-2">${pledge.phone}</td>
+                            <td class="p-2">₹${pledge.amount.toLocaleString('en-IN')}</td>
+                            <td class="p-2">
+                                <button data-id="${doc.id}" class="delete-pledge-btn text-red-500 hover:text-red-700">Delete</button>
+                            </td>
+                        </tr>`;
+                    }).join('')}
+                    </tbody>
+                </table>`;
+
+                document.querySelectorAll('.delete-pledge-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        const confirmed = await showConfirmModal('Are you sure you want to delete this pledge?');
+                        if (confirmed) {
+                            try {
+                                await deleteDoc(doc(db, pledgesCollectionPath, docId));
+                                showModal('Pledge deleted successfully.');
+                            } catch (error) {
+                                showModal('Error deleting pledge: ' + error.message);
+                            }
+                        }
+                    });
+                });
+            });
+        };
+
+        const loadAdminContentForm = async () => {
+            const form = document.getElementById('content-form');
+            if (!form) return;
+
+            const contentRef = doc(db, "settings", "content");
+            const socialLinksRef = doc(db, "settings", "socialLinks");
+
+            const contentSnap = await getDoc(contentRef);
+            const socialLinksSnap = await getDoc(socialLinksRef);
+
+            if (contentSnap.exists()) {
+                const data = contentSnap.data();
+                form.heroTitle.value = data.heroTitle || '';
+                form.heroSubtitle.value = data.heroSubtitle || '';
+                form.missionTitle.value = data.missionTitle || '';
+                form.missionSubtitle.value = data.missionSubtitle || '';
+                form.pillar1Title.value = data.pillar1Title || '';
+                form.pillar1Text.value = data.pillar1Text || '';
+                form.pillar2Title.value = data.pillar2Title || '';
+                form.pillar2Text.value = data.pillar2Text || '';
+            }
+
+            if (socialLinksSnap.exists()) {
+                const data = socialLinksSnap.data();
+                form.facebook.value = data.facebook || '';
+                form.twitter.value = data.twitter || '';
+                form.instagram.value = data.instagram || '';
+            }
         };
 
         // --- Event Handlers ---
@@ -929,7 +1212,7 @@
                     if (recentDonations.length > 0) {
                         ticker.style.display = 'flex';
                         const donation = recentDonations[tickerIndex];
-                        tickerText.textContent = `${donation.name} from ${donation.location} just donated ₹${donation.amount}!`;
+                        tickerText.textContent = `${donation.name} from ${donation.location} just donated ₹${donation.amount.toLocaleString('en-IN')}!`;
                         gsap.fromTo(ticker, {opacity: 0, y: 20}, {opacity: 1, y: 0, duration: 0.5});
                         setTimeout(() => {
                            gsap.to(ticker, {opacity: 0, y: 20, duration: 0.5});
