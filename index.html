@@ -825,6 +825,9 @@
                 mainContent.appendChild(template.content.cloneNode(true));
                 const container = mainContent.querySelector('#admin-view-container');
                 
+                // Show a spinner for immediate feedback
+                container.innerHTML = `<div class="flex justify-center items-center p-20"><div class="spinner"></div></div>`;
+
                 if (currentUser && !currentUser.isAnonymous && await isAdmin(currentUser.email)) {
                     renderAdminDashboard(container, currentUser);
                 } else {
@@ -971,7 +974,10 @@
                     </div>
                 </div>
             `;
-            container.querySelector('#admin-logout-btn').addEventListener('click', () => signOut(auth));
+            container.querySelector('#admin-logout-btn').addEventListener('click', () => {
+                signOut(auth);
+                navigateTo('admin');
+            });
             
             // Add Logo Form Logic
             container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
