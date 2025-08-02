@@ -13,22 +13,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     
     <!-- GSAP Animation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
     <style>
+        :root {
+            --background-main: #fdfcfa;
+            --background-alt: #f8fafc; /* gray-50 */
+            --background-card: #ffffff;
+            --text-primary: #1f2937;   /* gray-800 */
+            --text-secondary: #4b5563; /* gray-600 */
+            --primary: #2563eb;       /* blue-600 */
+            --accent: #D4AF37;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #fdfcfa;
-            color: #374151; /* gray-700 */
+            background-color: var(--background-main);
+            color: var(--text-secondary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         html { scroll-behavior: smooth; }
-        .gold-text { color: #D4AF37; }
+        .gold-text { color: var(--accent); }
         
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #app-shell {
+            opacity: 0; /* Initially hidden */
+        }
+
         /* Input focus style */
         input:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 0 2px #bfdbfe; /* blue-200 */
-            border-color: #60a5fa; /* blue-400 */
+            box-shadow: 0 0 0 2px var(--primary);
+            border-color: var(--primary);
         }
 
         /* Modal Styles */
@@ -41,7 +71,8 @@
         }
         .modal-backdrop.visible { opacity: 1; visibility: visible; }
         .modal-content {
-            background-color: white; padding: 2rem;
+            background-color: var(--background-card); 
+            padding: 2rem;
             border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center; max-width: 90%; width: 400px;
             transform: scale(0.9); transition: transform 0.3s ease;
@@ -53,8 +84,8 @@
             position: fixed;
             bottom: 1rem;
             left: 1rem;
-            background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(5px);
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
             padding: 0.75rem 1.25rem;
             border-radius: 9999px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -64,66 +95,100 @@
             gap: 0.75rem;
         }
         
-        /* Edit Mode Styles */
-        .edit-btn {
-            position: absolute;
-            top: -0.5rem;
-            right: -0.5rem;
-            background-color: #3b82f6;
-            color: white;
-            border-radius: 9999px;
-            width: 2rem;
-            height: 2rem;
-            display: none;
+        /* Consistent Section Padding */
+        .section-padding {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+        
+        /* Card Hover Effect */
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        /* Gallery Item Hover */
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+        .gallery-item img {
+            transition: transform 0.4s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        /* Theme Switcher */
+        #theme-switcher {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: var(--background-card);
+            color: var(--text-primary);
+            border: 1px solid var(--background-alt);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 20;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
         }
-        .editable-section:hover .edit-btn {
-            display: flex;
+        #theme-switcher:hover {
+            transform: scale(1.1);
         }
-        body.edit-mode .editable-section {
-            position: relative;
-            border: 2px dashed #3b82f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+    
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
 
     <!-- App Shell: Header, Main Content, Footer -->
     <div id="app-shell">
-        <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
+        <header class="bg-[var(--background-card)]/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
             <div class="container mx-auto flex justify-between items-center p-4">
                 <a href="#" data-page="home" class="nav-link flex items-center gap-2 text-2xl font-bold gold-text">
-                    <svg class="h-8 w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M22 12c0 5.523-4.477 10-10 10" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 2C14.5367 4.29332 16 7.46422 16 11V12" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 22C9.46329 19.7067 8 16.5358 8 13V12" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>Srian Foundation</span>
+                    <img id="website-logo" src="https://ik.imagekit.io/gmxabb1dm/srian-logo.png?updatedAt=1753800313508" alt="Srian Foundation Logo" class="h-10 w-10 rounded-full">
+                    <span class="text-[var(--text-primary)]">Srian Foundation</span>
                 </a>
-                <nav class="hidden md:flex space-x-6 items-center text-gray-700">
-                    <a href="#" data-page="home" class="nav-link hover:text-blue-600 transition-colors">Home</a>
-                    <a href="#" data-page="donors" class="nav-link hover:text-blue-600 transition-colors">Our Donors</a>
-                    <a href="#" data-page="gallery" class="nav-link hover:text-blue-600 transition-colors">Gallery</a>
-                    <a href="#" data-page="about" class="nav-link hover:text-blue-600 transition-colors">About Us</a>
-                    <a href="#" data-page="contact" class="nav-link bg-blue-600 text-white px-4 py-2 rounded-full font-semibold shadow-md hover:bg-blue-700">Contact</a>
+                <nav class="hidden md:flex space-x-6 items-center text-[var(--text-secondary)]">
+                    <a href="#" data-page="home" class="nav-item hover:text-[var(--primary)] transition-colors">Home</a>
+                    <a href="#" data-page="donors" class="nav-item hover:text-[var(--primary)] transition-colors">Our Donors</a>
+                    <a href="#" data-page="gallery" class="nav-item hover:text-[var(--primary)] transition-colors">Gallery</a>
+                    <a href="#" data-page="about" class="nav-item hover:text-[var(--primary)] transition-colors">About Us</a>
+                    <a href="#" data-page="contact" class="nav-item bg-[var(--primary)] text-white px-4 py-2 rounded-full font-semibold shadow-md hover:opacity-90 transition-all duration-300">Contact</a>
                 </nav>
-                <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-200">
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--background-alt)]">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
-            <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-                <a href="#" data-page="home" class="nav-link block py-3 px-4 hover:bg-gray-100">Home</a>
-                <a href="#" data-page="donors" class="nav-link block py-3 px-4 hover:bg-gray-100">Our Donors</a>
-                <a href="#" data-page="gallery" class="nav-link block py-3 px-4 hover:bg-gray-100">Gallery</a>
-                <a href="#" data-page="about" class="nav-link block py-3 px-4 hover:bg-gray-100">About Us</a>
-                <a href="#" data-page="contact" class="nav-link block py-3 px-4 hover:bg-gray-100">Contact</a>
+            <div id="mobile-menu" class="hidden md:hidden bg-[var(--background-card)] border-t border-[var(--background-alt)]">
+                <a href="#" data-page="home" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Home</a>
+                <a href="#" data-page="donors" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Our Donors</a>
+                <a href="#" data-page="gallery" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Gallery</a>
+                <a href="#" data-page="about" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">About Us</a>
+                <a href="#" data-page="contact" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Contact</a>
             </div>
         </header>
 
@@ -131,15 +196,15 @@
 
         <footer class="bg-gray-800 text-gray-300">
             <div class="container mx-auto py-12 px-4 text-center">
-                <h3 class="text-2xl font-bold gold-text">Srian Foundation</h3>
-                <p class="mt-4">Making the world a better place, one smile at a time.</p>
-                <div id="social-links-container" class="flex justify-center space-x-6 mt-6">
+                <h3 class="footer-item text-2xl font-bold gold-text">Srian Foundation</h3>
+                <p class="footer-item mt-4 max-w-2xl mx-auto">Making the world a better place, one smile at a time.</p>
+                <div id="social-links-container" class="footer-item flex justify-center space-x-6 mt-6">
                     <!-- Social media links will be rendered here -->
                 </div>
-                <div class="mt-8 border-t border-gray-700 pt-6">
+                <div class="footer-item mt-8 border-t border-gray-700 pt-6">
                     <a href="#" data-page="admin" class="nav-link text-sm text-gray-400 hover:text-white">Admin Panel</a>
                 </div>
-                <p class="mt-6 text-sm">&copy; 2025 Srian Foundation. All Rights Reserved.</p>
+                <p class="footer-item mt-6 text-sm">&copy; 2025 Srian Foundation. All Rights Reserved.</p>
             </div>
         </footer>
     </div>
@@ -160,21 +225,25 @@
         </div>
     </div>
 
+    <!-- Theme Switcher -->
+    <button id="theme-switcher" title="Cycle Themes">
+        <i class="fas fa-palette"></i>
+    </button>
+
     <!-- Page Templates -->
     <template id="template-home">
         <!-- Hero Section -->
         <section class="hero-section bg-gradient-to-br from-blue-50 to-yellow-50 relative overflow-hidden">
-            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between py-20 md:py-32 px-4 text-center md:text-left">
-                <div class="md:w-1/2 z-10 editable-section" data-content-key="hero">
-                    <button class="edit-btn" data-edit-key="hero"><i class="fas fa-pencil-alt"></i></button>
-                    <h1 id="hero-title" class="hero-title text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">
+            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between section-padding px-4">
+                <div class="md:w-1/2 z-10 text-center md:text-left">
+                    <h1 class="hero-title text-4xl md:text-6xl font-extrabold text-[var(--text-primary)] leading-tight">
                         Your Kindness Writes Their Future ✨
                     </h1>
-                    <p id="hero-subtitle" class="hero-p mt-6 text-lg md:text-xl max-w-xl mx-auto md:mx-0 text-gray-600">
+                    <p class="hero-p mt-6 text-lg md:text-xl max-w-xl mx-auto md:mx-0 text-[var(--text-secondary)]">
                         For years, our community of supporters has been the driving force behind our mission to feed and educate. Join us in continuing this legacy of hope.
                     </p>
                     <div class="mt-10 hero-btn">
-                        <a href="#donate-form-section" class="bg-[#D4AF37] text-white text-lg font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition-transform inline-block">
+                        <a href="#donate-form-section" class="bg-[var(--accent)] text-white text-lg font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition-transform inline-block">
                             Join Our Mission <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                     </div>
@@ -183,65 +252,63 @@
                     <img id="hero-image" src="https://ik.imagekit.io/gmxabb1dm/Download%20Donation%20box%20and%20charity%20concept_%20Human%20hands%20putting%20money%20cash%20love%20and%20heart%20to%20donation%20box%20together%20helping%20doing%20charity%20vector%20illustration%20for%20free.jpeg?updatedAt=1753799288747" alt="A child studying happily" class="rounded-2xl shadow-2xl w-full" />
                 </div>
             </div>
-            <div class="floating-icons absolute top-0 left-0 w-full h-full"></div>
         </section>
 
         <!-- Our Mission Section -->
-        <section class="py-20 bg-gray-50">
+        <section class="section-padding bg-[var(--background-alt)] overflow-hidden">
             <div class="container mx-auto px-4 text-center">
-                <div class="editable-section" data-content-key="mission">
-                    <button class="edit-btn" data-edit-key="mission"><i class="fas fa-pencil-alt"></i></button>
-                    <h2 id="mission-title" class="text-3xl md:text-4xl font-bold text-gray-800">An Enduring Commitment 💖</h2>
-                    <p id="mission-subtitle" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                <div class="section-title">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">An Enduring Commitment 💖</h2>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">
                         Our work is built on a simple principle: every act of kindness matters. We focus on two core pillars to create lasting change.
                     </p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12 max-w-4xl mx-auto">
-                    <div class="bg-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300 editable-section" data-content-key="pillar1">
-                         <button class="edit-btn" data-edit-key="pillar1"><i class="fas fa-pencil-alt"></i></button>
+                    <div class="mission-card hover-card bg-blue-50 p-8 rounded-2xl shadow-lg">
                         <i class="fas fa-utensils text-4xl text-blue-500 mb-4"></i>
-                        <h3 id="mission-pillar1-title" class="text-2xl font-bold text-gray-800">Food for the Soul 🍲</h3>
-                        <p id="mission-pillar1-text" class="text-gray-600 mt-2">Providing warm, nutritious meals to children and the homeless has always been at the heart of what we do.</p>
+                        <h3 class="text-2xl font-bold text-gray-800">Food for the Soul 🍲</h3>
+                        <p class="text-gray-600 mt-2">Providing warm, nutritious meals to children and the homeless has always been at the heart of what we do.</p>
                     </div>
-                    <div class="bg-yellow-50 p-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-2 transition-transform duration-300 editable-section" data-content-key="pillar2">
-                         <button class="edit-btn" data-edit-key="pillar2"><i class="fas fa-pencil-alt"></i></button>
+                    <div class="mission-card hover-card bg-yellow-50 p-8 rounded-2xl shadow-lg">
                         <i class="fas fa-graduation-cap text-4xl text-yellow-500 mb-4"></i>
-                        <h3 id="mission-pillar2-title" class="text-2xl font-bold text-gray-800">Opening Doors Through Education 🎓</h3>
-                        <p id="mission-pillar2-text" class="text-gray-600 mt-2">We believe in the power of education to break the cycle of poverty and unlock a brighter future for intelligent students.</p>
+                        <h3 class="text-2xl font-bold text-gray-800">Opening Doors Through Education 🎓</h3>
+                        <p class="text-gray-600 mt-2">We believe in the power of education to break the cycle of poverty and unlock a brighter future for intelligent students.</p>
                     </div>
                 </div>
             </div>
         </section>
         
         <!-- Testimonials Section -->
-        <section id="testimonials-section" class="py-20 bg-white"></section>
+        <section id="testimonials-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
 
         <!-- Donation Form Section -->
-        <section id="donate-form-section" class="py-20 bg-gray-50"></section>
+        <section id="donate-form-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
         
         <!-- Photo Gallery Preview Section -->
-        <section id="gallery-preview-section" class="py-20 bg-white"></section>
+        <section id="gallery-preview-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+
+        <!-- Contact Section on Home Page -->
+        <section id="home-contact-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
     </template>
 
     <template id="template-donors">
-        <div class="py-20 bg-gray-50 min-h-screen">
+        <div class="section-padding bg-[var(--background-alt)] min-h-screen overflow-hidden">
             <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h1 id="donors-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Our Wall of Heroes ⭐</h1>
-                    <p class="mt-4 text-lg text-gray-600">A heartfelt thank you to every single person who has contributed to our cause.</p>
+                <div class="text-center mb-16 section-title">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Our Wall of Heroes ⭐</h1>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)]">A heartfelt thank you to every single person who has contributed to our cause.</p>
                 </div>
                 
-                <!-- Top 3 Donors Section -->
                 <div id="top-donors-highlight" class="mb-20">
                     <!-- Top donors will be rendered here by JS -->
                 </div>
 
                 <div class="max-w-4xl mx-auto">
-                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">All Supporters</h2>
+                    <h2 class="text-3xl font-bold text-center text-[var(--text-primary)] mb-8 section-title">All Supporters</h2>
                     <div class="mb-8">
-                        <input type="text" id="donor-search" placeholder="Search for a supporter..." class="p-3 border rounded-lg w-full transition" />
+                        <input type="text" id="donor-search" placeholder="Search for a supporter..." class="p-3 border rounded-lg w-full transition bg-[var(--background-card)] text-[var(--text-primary)]" />
                     </div>
-                    <div id="donors-list-container" class="bg-white rounded-2xl shadow-lg p-8">
+                    <div id="donors-list-container" class="bg-[var(--background-card)] rounded-2xl shadow-lg p-8">
                         <!-- Rest of the donors list will be rendered here -->
                     </div>
                 </div>
@@ -250,14 +317,14 @@
     </template>
     
     <template id="template-gallery">
-        <div class="py-20 bg-white min-h-screen">
+        <div class="section-padding bg-[var(--background-card)] min-h-screen overflow-hidden">
             <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h1 id="gallery-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Moments We Cherish 📸</h1>
-                    <p class="mt-4 text-lg text-gray-600">Moments of joy and hope, made possible by you.</p>
+                <div class="text-center mb-16 section-title">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Moments We Cherish 📸</h1>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)]">Moments of joy and hope, made possible by you.</p>
                 </div>
                  <div class="max-w-xl mx-auto mb-12">
-                    <input type="text" id="gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full transition" />
+                    <input type="text" id="gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" />
                 </div>
                 <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <!-- Gallery images will be rendered here -->
@@ -267,22 +334,22 @@
     </template>
 
     <template id="template-about">
-        <div class="py-20 bg-white">
+        <div class="section-padding bg-[var(--background-card)] overflow-hidden">
             <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h1 id="about-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">The Heart of Our Mission ❤️</h1>
-                    <p class="mt-4 text-lg text-gray-600">Learn more about who we are and what we do.</p>
+                <div class="text-center mb-16 section-title">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">The Heart of Our Mission ❤️</h1>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)]">Learn more about who we are and what we do.</p>
                 </div>
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16">
-                    <div class="w-full md:w-1/2">
-                        <img src="https://ik.imagekit.io/gmxabb1dm/20250729_2013_Srian%20Foundation%20Poster_simple_compose_01k1ba5pqgfwgbs4gpbmyahk7r.png?updatedAt=1753800313508" alt="Our Team" class="rounded-lg shadow-xl w-full h-auto" />
+                    <div class="w-full md:w-1/2 about-image">
+                        <img id="about-image" src="https://ik.imagekit.io/gmxabb1dm/20250729_2013_Srian%20Foundation%20Poster_simple_compose_01k1ba5pqgfwgbs4gpbmyahk7r.png?updatedAt=1753800313508" alt="Our Team" class="rounded-lg shadow-xl w-full h-auto" />
                     </div>
-                    <div class="w-full md:w-1/2">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Driven by Compassion</h2>
-                        <p class="text-gray-600 mb-4">
+                    <div class="w-full md:w-1/2 about-text">
+                        <h2 class="text-3xl font-bold text-[var(--text-primary)] mb-4">Driven by Compassion</h2>
+                        <p class="text-[var(--text-secondary)] mb-4">
                             Srian Foundation was founded on a simple yet powerful idea: that collective kindness can create profound change. We are a dedicated team of volunteers, social workers, and community leaders committed to uplifting underprivileged children and individuals.
                         </p>
-                        <p class="text-gray-600">
+                        <p class="text-[var(--text-secondary)]">
                             Our mission is to ensure that no child goes hungry and every child has access to quality education. We create transparent, impactful programs that connect generous donors with those who need it most.
                         </p>
                     </div>
@@ -292,24 +359,24 @@
     </template>
 
     <template id="template-contact">
-        <div class="py-20 bg-gray-50">
+        <div class="section-padding bg-[var(--background-alt)] overflow-hidden">
             <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h1 id="contact-page-title" class="text-4xl md:text-5xl font-bold text-gray-800">Let's Connect 🤝</h1>
-                    <p class="mt-4 text-lg text-gray-600">We'd love to hear from you. Send us a message below.</p>
+                <div class="text-center mb-16 section-title">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Let's Connect 🤝</h1>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)]">We'd love to hear from you. Send us a message below.</p>
                 </div>
-                <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+                <div class="max-w-2xl mx-auto bg-[var(--background-card)] p-8 rounded-2xl shadow-lg contact-form-container">
                     <form action="https://formspree.io/f/xldlnvrv" method="POST" class="space-y-6">
                         <div>
-                            <label for="contact-email" class="block text-left text-sm font-medium text-gray-700 mb-1">Your Email:</label>
-                            <input type="email" id="contact-email" name="email" class="p-3 border rounded-lg w-full transition" required />
+                            <label for="contact-email" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Email:</label>
+                            <input type="email" id="contact-email" name="email" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                         </div>
                         <div>
-                            <label for="message" class="block text-left text-sm font-medium text-gray-700 mb-1">Your Message:</label>
-                            <textarea id="message" name="message" rows="4" class="p-3 border rounded-lg w-full transition" required></textarea>
+                            <label for="message" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Message:</label>
+                            <textarea id="message" name="message" rows="4" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required></textarea>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="bg-blue-600 text-white text-lg font-semibold px-10 py-3 rounded-full shadow-lg w-full hover:bg-blue-700 transition-colors">
+                            <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-3 rounded-full shadow-lg w-full hover:opacity-90 transition-colors">
                                 Send
                             </button>
                         </div>
@@ -320,7 +387,7 @@
     </template>
     
     <template id="template-admin">
-        <div class="py-20 bg-gray-100 min-h-screen">
+        <div class="section-padding bg-gray-100 min-h-screen">
             <div id="admin-view-container">
                 <!-- Admin Login or Dashboard will be rendered here -->
             </div>
@@ -335,7 +402,14 @@
 
         // --- App State & Elements ---
         const mainContent = document.getElementById('main-content');
+        const appShell = document.getElementById('app-shell');
+        const preloader = document.getElementById('preloader');
         let db, auth;
+        let currentUser = null;
+        let currentPageUnsubscribe = null; // Variable to hold the unsubscribe function
+        
+        // --- GSAP Plugin Registration ---
+        gsap.registerPlugin(ScrollTrigger);
 
         // --- Cloudinary Configuration ---
         const CLOUDINARY_CLOUD_NAME = "dugnv4zww";
@@ -346,9 +420,9 @@
         const modalMessage = document.getElementById('modal-message');
         const modalButtons = document.getElementById('modal-buttons');
 
-        const showModal = (message) => {
+        const showModal = (message, content = '') => {
             modalMessage.textContent = message;
-            modalButtons.innerHTML = `<button id="modal-close-button" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">Close</button>`;
+            modalButtons.innerHTML = content + `<button id="modal-close-button" class="bg-[var(--primary)] text-white font-semibold px-6 py-2 rounded-full hover:opacity-90 transition-colors">Close</button>`;
             modal.classList.add('visible');
             document.getElementById('modal-close-button').addEventListener('click', hideModal);
         };
@@ -403,7 +477,10 @@
                 });
                 const data = await response.json();
                 if (data.secure_url) {
-                    return data.secure_url;
+                    // SPEED OPTIMIZATION: Add Cloudinary auto-format and auto-quality transformations
+                    const urlParts = data.secure_url.split('/upload/');
+                    const optimizedUrl = `${urlParts[0]}/upload/f_auto,q_auto/${urlParts[1]}`;
+                    return optimizedUrl;
                 } else {
                     throw new Error('Image upload failed.');
                 }
@@ -416,33 +493,33 @@
         // --- Reusable Component Renderers ---
         const renderDonationForm = (container) => {
             container.innerHTML = `
-                <div class="container mx-auto px-4">
-                    <div class="text-center mb-16">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Pledge Your Support 🙏</h2>
-                        <p class="mt-4 text-lg text-gray-600">Fill out the form below and we will contact you to complete your donation.</p>
+                <div class="container mx-auto px-4 text-center">
+                    <div class="section-title">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Pledge Your Support 🙏</h2>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Fill out the form below and we will contact you to complete your donation.</p>
                     </div>
-                    <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="max-w-2xl mx-auto bg-[var(--background-card)] p-8 rounded-2xl shadow-lg mt-12 donation-form-container">
                         <form id="donation-form" class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="name" class="block text-left text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                                    <input type="text" name="name" id="name" placeholder="John Doe" class="p-3 border rounded-lg w-full transition" required />
+                                    <label for="name" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Name</label>
+                                    <input type="text" name="name" id="name" placeholder="John Doe" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
-                                    <label for="email" class="block text-left text-sm font-medium text-gray-700 mb-1">Your Email</label>
-                                    <input type="email" name="email" id="email" placeholder="john.doe@example.com" class="p-3 border rounded-lg w-full transition" required />
+                                    <label for="email" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Email</label>
+                                    <input type="email" name="email" id="email" placeholder="john.doe@example.com" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
-                                    <label for="phone" class="block text-left text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                    <input type="tel" name="phone" id="phone" placeholder="Your phone number" class="p-3 border rounded-lg w-full transition" required />
+                                    <label for="phone" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Phone Number</label>
+                                    <input type="tel" name="phone" id="phone" placeholder="Your phone number" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                                 </div>
                                 <div>
-                                    <label for="amount" class="block text-left text-sm font-medium text-gray-700 mb-1">Pledge Amount (INR)</label>
-                                    <input type="number" name="amount" id="amount" placeholder="e.g., 5000" class="p-3 border rounded-lg w-full transition" required />
+                                    <label for="amount" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Pledge Amount (INR)</label>
+                                    <input type="number" name="amount" id="amount" placeholder="e.g., 5000" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                                 </div>
                             </div>
                             <div class="text-center pt-4">
-                                <button type="submit" class="bg-blue-600 text-white text-lg font-semibold px-10 py-4 rounded-full shadow-lg w-full hover:bg-blue-700 transition-colors disabled:bg-gray-400">
+                                <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-4 rounded-full shadow-lg w-full hover:opacity-90 transition-colors disabled:bg-gray-400">
                                     Submit Pledge
                                 </button>
                             </div>
@@ -457,9 +534,23 @@
         const renderTestimonials = (container) => {
             container.innerHTML = `
                 <div class="container mx-auto px-4 text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Voices from Our Community 📣</h2>
+                    <div class="section-title">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Voices from Our Community 📣</h2>
+                    </div>
                     <div id="testimonials-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                        <!-- Testimonials will be rendered here -->
+                        <!-- Mock Testimonials for Demo -->
+                        <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
+                            <p class="text-[var(--text-secondary)] italic">"The transparency and impact of Srian Foundation are truly remarkable. It's a privilege to be a part of this community."</p>
+                            <p class="font-bold text-[var(--text-primary)] mt-4">- Priya Sharma</p>
+                        </div>
+                         <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
+                            <p class="text-[var(--text-secondary)] italic">"Seeing the smiles on the children's faces makes every contribution worthwhile. Thank you for your incredible work!"</p>
+                            <p class="font-bold text-[var(--text-primary)] mt-4">- Rohan Gupta</p>
+                        </div>
+                         <div class="testimonial-card hover-card bg-[var(--background-alt)] p-8 rounded-2xl shadow-lg">
+                            <p class="text-[var(--text-secondary)] italic">"A fantastic organization that genuinely makes a difference. Their dedication to education is inspiring."</p>
+                            <p class="font-bold text-[var(--text-primary)] mt-4">- Anjali Mehta</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -471,16 +562,16 @@
                 'https://picsum.photos/seed/event3/400/400', 'https://picsum.photos/seed/event4/400/400',
             ];
             container.innerHTML = `
-                <div class="container mx-auto px-4">
-                    <div class="text-center mb-16">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">A Glimpse of the Smiles You Create 😊</h2>
-                        <p class="mt-4 text-lg text-gray-600">Moments from our food distribution and education support events.</p>
+                <div class="container mx-auto px-4 text-center">
+                    <div class="section-title">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">A Glimpse of the Smiles You Create 😊</h2>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Moments from our food distribution and education support events.</p>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${galleryImages.map(src => `<img src="${src}" class="rounded-lg shadow-md w-full h-full object-cover" />`).join('')}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 gallery-preview-grid">
+                        ${galleryImages.map(src => `<div class="gallery-item rounded-lg shadow-md"><img src="${src}" class="w-full h-full object-cover" /></div>`).join('')}
                     </div>
                     <div class="text-center mt-12">
-                        <a href="#" data-page="gallery" class="nav-link bg-blue-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-blue-700 transition-colors">
+                        <a href="#" data-page="gallery" class="nav-link bg-[var(--primary)] text-white font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-colors">
                             View Full Gallery
                         </a>
                     </div>
@@ -488,6 +579,88 @@
             `;
             container.querySelector('.nav-link').addEventListener('click', handleNavClick);
         };
+
+        const renderContactSection = (container) => {
+            container.innerHTML = `
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-16 section-title">
+                        <h1 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Let's Connect 🤝</h1>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)]">We'd love to hear from you. Send us a message below.</p>
+                    </div>
+                    <div class="max-w-2xl mx-auto bg-[var(--background-card)] p-8 rounded-2xl shadow-lg contact-form-container">
+                        <form action="https://formspree.io/f/xldlnvrv" method="POST" class="space-y-6">
+                            <div>
+                                <label for="home-contact-email" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Email:</label>
+                                <input type="email" id="home-contact-email" name="email" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
+                            </div>
+                            <div>
+                                <label for="home-message" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Your Message:</label>
+                                <textarea id="home-message" name="message" rows="4" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-3 rounded-full shadow-lg w-full hover:opacity-90 transition-colors">
+                                    Send
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        };
+        
+        // --- Animation Functions ---
+        const animateOnScroll = (selector, from, to) => {
+            gsap.fromTo(selector, from, {
+                ...to,
+                scrollTrigger: {
+                    trigger: selector,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none',
+                },
+            });
+        };
+        
+        const runPageAnimations = (page) => {
+            // Default fade-in for section titles
+            document.querySelectorAll('.section-title').forEach(el => {
+                animateOnScroll(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
+            });
+
+            if (page === 'home') {
+                gsap.from('.hero-title', { opacity: 0, y: 30, duration: 1, ease: 'power3.out', delay: 0.2 });
+                gsap.from('.hero-p', { opacity: 0, y: 30, duration: 1, ease: 'power3.out', delay: 0.4 });
+                gsap.from('.hero-btn', { opacity: 0, scale: 0.8, duration: 1, ease: 'elastic.out(1, 0.5)', delay: 0.6 });
+                gsap.from('.hero-img', { opacity: 0, scale: 1.1, duration: 1.2, ease: 'power3.out', delay: 0.3 });
+
+                document.querySelectorAll('.mission-card').forEach((card, index) => {
+                    animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.2 });
+                });
+                document.querySelectorAll('.testimonial-card').forEach((card, index) => {
+                    animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.2 });
+                });
+                document.querySelectorAll('.gallery-preview-grid .gallery-item').forEach((img, index) => {
+                    animateOnScroll(img, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out', delay: index * 0.1 });
+                });
+                 animateOnScroll('.donation-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+                 animateOnScroll('#home-contact-section .contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+            }
+            
+            if (page === 'gallery') {
+                 document.querySelectorAll('.gallery-item').forEach((item) => {
+                    animateOnScroll(item, { opacity: 0, scale: 0.8, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05 });
+                });
+            }
+            
+            if (page === 'about') {
+                animateOnScroll('.about-image', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 1, ease: 'power3.out' });
+                animateOnScroll('.about-text', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 1, ease: 'power3.out' });
+            }
+            
+             if (page === 'contact') {
+                animateOnScroll('.contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+            }
+        };
+
 
         // --- Page Render Functions ---
         const pages = {
@@ -498,33 +671,8 @@
                 renderTestimonials(mainContent.querySelector('#testimonials-section'));
                 renderDonationForm(mainContent.querySelector('#donate-form-section'));
                 renderGalleryPreview(mainContent.querySelector('#gallery-preview-section'));
-                
-                mainContent.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
-
-                // GSAP Animations for Home Page
-                gsap.from('.hero-title', { duration: 1, x: -50, opacity: 0, ease: 'power3.out', delay: 0.2 });
-                gsap.from('.hero-p', { duration: 1, x: -50, opacity: 0, ease: 'power3.out', delay: 0.4 });
-                const heroBtn = mainContent.querySelector('.hero-btn a');
-                gsap.from(heroBtn, { duration: 1, scale: 0.5, opacity: 0, ease: 'elastic.out(1, 0.5)', delay: 0.6 });
-                gsap.to(heroBtn, { scale: 1.05, duration: 1, repeat: -1, yoyo: true, ease: 'power1.inOut', delay: 2 });
-
-                gsap.from('.hero-img', { duration: 1.2, y: 50, opacity: 0, ease: 'power3.out', delay: 0.2 });
-                
-                const iconsContainer = mainContent.querySelector('.floating-icons');
-                iconsContainer.innerHTML = ''; // Clear previous icons
-                const icons = ['fa-graduation-cap', 'fa-book', 'fa-star', 'fa-lightbulb', 'fa-heart', 'fa-smile'];
-                for (let i = 0; i < 20; i++) {
-                    const iconEl = document.createElement('i');
-                    const iconClass = icons[Math.floor(Math.random() * icons.length)];
-                    iconEl.className = `fas ${iconClass} absolute text-blue-300 opacity-50`;
-                    iconEl.style.left = `${Math.random() * 100}%`;
-                    iconEl.style.fontSize = `${Math.random() * 20 + 10}px`;
-                    iconsContainer.appendChild(iconEl);
-                    gsap.to(iconEl, {
-                        y: '100vh', x: `${Math.random() * 200 - 100}px`,
-                        duration: Math.random() * 15 + 10, repeat: -1, ease: 'none', delay: Math.random() * 5
-                    });
-                }
+                renderContactSection(mainContent.querySelector('#home-contact-section'));
+                mainContent.querySelectorAll('.nav-link, .nav-item').forEach(link => link.addEventListener('click', handleNavClick));
             },
             donors: () => {
                 const template = document.getElementById('template-donors');
@@ -535,45 +683,47 @@
                 let allDonors = [];
 
                 const renderTopDonors = (topThree) => {
+                    if (!topDonorsContainer) return;
                     if (topThree.length === 0) {
                         topDonorsContainer.innerHTML = '';
                         return;
                     }
                     const medals = ['🥇', '🥈', '🥉'];
+                    
+                    let orderedTopThree = [...topThree];
+                    if (topThree.length > 1) {
+                        orderedTopThree = [topThree[1], topThree[0], ...topThree.slice(2)];
+                    }
+
                     topDonorsContainer.innerHTML = `
-                        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Our Top Supporters</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
-                            ${topThree.map((donor, index) => {
+                        <h2 class="text-3xl font-bold text-center text-[var(--text-primary)] mb-8 section-title">Our Top Supporters</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                            ${orderedTopThree.map((donor, index) => {
+                                const originalIndex = topThree.indexOf(donor);
                                 const initials = donor.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                                 const imageSrc = donor.imageUrl || `https://placehold.co/128x128/E0E7FF/3730A3?text=${initials}`;
-                                const orderClass = index === 1 ? 'md:order-1' : (index === 0 ? 'md:order-2' : 'md:order-3');
-                                const scaleClass = index === 0 ? 'md:scale-110' : '';
+                                const scaleClass = originalIndex === 0 ? 'md:scale-110' : '';
+                                const medal = medals[originalIndex];
 
                                 return `
-                                    <div class="top-donor-card bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300 ${orderClass} ${scaleClass}">
+                                    <div class="top-donor-card hover-card bg-[var(--background-card)] p-6 rounded-2xl shadow-lg text-center ${scaleClass}">
                                         <div class="relative inline-block">
                                             <img src="${imageSrc}" alt="${donor.name}" class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-md object-cover" />
-                                            <span class="absolute -top-2 -right-2 text-4xl">${medals[index]}</span>
+                                            <span class="absolute -top-2 -right-2 text-4xl">${medal}</span>
                                         </div>
-                                        <h3 class="text-2xl font-bold mt-4 text-gray-800">${donor.name}</h3>
+                                        <h3 class="text-2xl font-bold mt-4 text-[var(--text-primary)]">${donor.name}</h3>
                                         <p class="text-lg font-semibold gold-text mt-1">₹${donor.amount.toLocaleString('en-IN')}</p>
                                     </div>
                                 `;
                             }).join('')}
                         </div>
                     `;
-                    gsap.from(".top-donor-card", {
-                        duration: 0.8,
-                        y: 50,
-                        opacity: 0,
-                        stagger: 0.2,
-                        ease: "power3.out"
-                    });
                 };
 
                 const renderDonorList = (donorsToRender) => {
+                    if (!restOfDonorsContainer) return;
                     if (donorsToRender.length === 0) {
-                        restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">No other donors found.</p>`;
+                        restOfDonorsContainer.innerHTML = `<p class="text-center text-[var(--text-secondary)]">No other donors found.</p>`;
                         return;
                     }
                     restOfDonorsContainer.innerHTML = `<div class="space-y-4">${donorsToRender.map((donor) => {
@@ -582,12 +732,12 @@
                         const imageSrc = donor.imageUrl || `https://placehold.co/48x48/E0E7FF/3730A3?text=${initials}`;
                         
                         return `
-                            <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                            <div class="donor-list-item flex items-center justify-between p-4 bg-[var(--background-alt)] rounded-lg">
                                 <div class="flex items-center gap-4">
                                     <img src="${imageSrc}" alt="${donor.name}" class="w-12 h-12 rounded-full object-cover" />
                                     <div>
-                                        <p class="font-semibold text-gray-800">${donor.name}</p>
-                                        <p class="text-sm text-gray-500">${donor.location}</p>
+                                        <p class="font-semibold text-[var(--text-primary)]">${donor.name}</p>
+                                        <p class="text-sm text-[var(--text-secondary)]">${donor.location}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
@@ -596,6 +746,14 @@
                                 </div>
                             </div>`;
                     }).join('')}</div>`;
+
+                    gsap.from(".donor-list-item", {
+                        duration: 0.5,
+                        opacity: 0,
+                        y: 20,
+                        stagger: 0.05,
+                        ease: "power3.out"
+                    });
                 };
 
                 const searchInput = document.getElementById('donor-search');
@@ -605,15 +763,15 @@
                     renderDonorList(filteredDonors);
                 });
 
-                restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">Loading donors...</p>`;
+                restOfDonorsContainer.innerHTML = `<p class="text-center text-[var(--text-secondary)]">Loading donors...</p>`;
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 const donationsCollectionPath = `/artifacts/${appId}/public/data/donations`;
                 const q = query(collection(db, donationsCollectionPath));
 
-                onSnapshot(q, (snapshot) => {
+                currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
                         topDonorsContainer.innerHTML = '';
-                        restOfDonorsContainer.innerHTML = `<p class="text-center text-gray-500">No donations yet. Be the first!</p>`;
+                        restOfDonorsContainer.innerHTML = `<p class="text-center text-[var(--text-secondary)]">No donations yet. Be the first!</p>`;
                         return;
                     }
                     
@@ -625,6 +783,7 @@
                     
                     renderTopDonors(topThree);
                     renderDonorList(allDonors);
+                    runPageAnimations('donors');
                 });
             },
             gallery: () => {
@@ -632,21 +791,22 @@
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
                 const galleryGrid = mainContent.querySelector('#gallery-grid');
-                galleryGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">Loading gallery...</p>`;
+                galleryGrid.innerHTML = `<p class="text-center text-[var(--text-secondary)] col-span-full">Loading gallery...</p>`;
 
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 const galleryCollectionPath = `/artifacts/${appId}/public/data/gallery`;
                 const q = query(collection(db, galleryCollectionPath));
 
-                onSnapshot(q, (snapshot) => {
+                currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
-                        galleryGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">No images in the gallery yet.</p>`;
+                        galleryGrid.innerHTML = `<p class="text-center text-[var(--text-secondary)] col-span-full">No images in the gallery yet.</p>`;
                         return;
                     }
                     galleryGrid.innerHTML = snapshot.docs.map(doc => {
                         const image = doc.data();
-                        return `<img src="${image.imageUrl}" class="rounded-lg shadow-md w-full h-full object-cover hover:scale-105 transform transition-transform duration-300 cursor-pointer" />`
+                        return `<div class="gallery-item shadow-md"><img src="${image.imageUrl}" class="w-full h-full object-cover" /></div>`
                     }).join('');
+                    runPageAnimations('gallery');
                 });
             },
             about: () => {
@@ -659,19 +819,17 @@
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
             },
-            admin: () => {
+            admin: async () => {
                 const template = document.getElementById('template-admin');
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
                 const container = mainContent.querySelector('#admin-view-container');
                 
-                onAuthStateChanged(auth, async (user) => {
-                    if (user && !user.isAnonymous && await isAdmin(user.email)) {
-                        renderAdminDashboard(container, user);
-                    } else {
-                        renderAdminLogin(container);
-                    }
-                });
+                if (currentUser && !currentUser.isAnonymous && await isAdmin(currentUser.email)) {
+                    renderAdminDashboard(container, currentUser);
+                } else {
+                    renderAdminLogin(container);
+                }
             }
         };
 
@@ -708,6 +866,8 @@
                     if (!userIsAdmin) {
                         await signOut(auth);
                         showModal('Access Denied. This Google account is not authorized.');
+                    } else {
+                        navigateTo('admin');
                     }
                 } catch (error) {
                     showModal('Login Failed: ' + error.message);
@@ -724,6 +884,15 @@
                             <span class="text-sm text-gray-600">Welcome, ${user.displayName || user.email}</span>
                             <button id="admin-logout-btn" class="bg-red-500 text-white font-semibold px-6 py-2 rounded-lg hover:bg-red-600">Sign Out</button>
                         </div>
+                    </div>
+                    
+                    <!-- Manage Logo Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Logo</h2>
+                        <form id="logo-form" class="space-y-4">
+                            <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full" required />
+                            <button type="submit" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-indigo-700 disabled:bg-gray-400">Upload New Logo</button>
+                        </form>
                     </div>
 
                     <!-- Manage Pledges Section -->
@@ -803,6 +972,9 @@
                 </div>
             `;
             container.querySelector('#admin-logout-btn').addEventListener('click', () => signOut(auth));
+            
+            // Add Logo Form Logic
+            container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
             
             // Add Donor Form Logic
             container.querySelector('#add-donor-form').addEventListener('submit', async (e) => {
@@ -961,7 +1133,7 @@
                 renderTable(filteredDonors);
             });
 
-            onSnapshot(q, (snapshot) => {
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
                 allDonors = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
                 renderTable(allDonors);
             });
@@ -1015,7 +1187,7 @@
                 renderGrid(filteredImages);
             });
 
-            onSnapshot(q, (snapshot) => {
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
                 allImages = snapshot.docs.sort((a, b) => b.data().createdAt - a.data().createdAt);
                 renderGrid(allImages);
             });
@@ -1030,7 +1202,7 @@
             const pledgesCollectionPath = `/artifacts/${appId}/public/data/pledges`;
             const q = query(collection(db, pledgesCollectionPath));
 
-            onSnapshot(q, (snapshot) => {
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
                     container.innerHTML = `<p class="text-center text-gray-500">No pledges yet.</p>`;
                     return;
@@ -1120,17 +1292,36 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
 
+            const name = form.name.value;
+            const amount = form.amount.value;
+
             try {
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 const pledgesCollectionPath = `/artifacts/${appId}/public/data/pledges`;
                 await addDoc(collection(db, pledgesCollectionPath), {
-                    name: form.name.value,
+                    name: name,
                     email: form.email.value,
                     phone: form.phone.value,
-                    amount: Number(form.amount.value),
+                    amount: Number(amount),
                     timestamp: new Date()
                 });
-                showModal('Thank you for your pledge! We will contact you shortly to complete the donation.');
+                
+                const thankYouContent = `
+                    <div id="gemini-thank-you" class="mt-4 text-left">
+                        <button id="generate-note-btn" class="bg-yellow-400 text-yellow-900 font-semibold px-4 py-2 rounded-full w-full mb-4 hover:bg-yellow-500 transition-colors">
+                            ✨ Generate a Personalized Thank You Note
+                        </button>
+                        <div id="note-container" class="hidden">
+                             <textarea id="thank-you-note" class="w-full h-32 p-2 border rounded-lg bg-[var(--background-alt)] text-[var(--text-secondary)]" readonly></textarea>
+                             <button id="copy-note-btn" class="bg-gray-200 text-gray-700 font-semibold px-4 py-1 rounded-full mt-2 text-sm hover:bg-gray-300">Copy</button>
+                        </div>
+                        <div id="loading-spinner" class="hidden justify-center items-center p-4"><div class="spinner"></div></div>
+                    </div>
+                `;
+                showModal('Thank you for your pledge! We will contact you shortly.', thankYouContent);
+                
+                document.getElementById('generate-note-btn').addEventListener('click', () => generateThankYouNote(name, amount));
+
                 form.reset();
             } catch (error) {
                 console.error("Error adding pledge: ", error);
@@ -1140,16 +1331,185 @@
                 button.textContent = 'Submit Pledge';
             }
         };
+        
+        const handleLogoUpload = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button');
+            const file = form.imageFile.files[0];
+            if (!file) {
+                showModal("Please select a file to upload.");
+                return;
+            }
 
-        // --- Router ---
-        const navigateTo = (page) => {
-            window.scrollTo(0, 0);
-            if (pages[page]) {
-                pages[page]();
-            } else {
-                pages.home(); // Default to home
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner mx-auto"></div>';
+
+            try {
+                const imageUrl = await uploadImageCloudinary(file);
+                await setDoc(doc(db, "settings", "logo"), { url: imageUrl });
+                showModal("Logo updated successfully!");
+            } catch (error) {
+                showModal("Error uploading logo: " + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = "Upload New Logo";
+                form.reset();
             }
         };
+        
+        // --- Router ---
+        const navigateTo = async (page) => {
+            // Detach any active Firestore listeners from the previous page
+            if (typeof currentPageUnsubscribe === 'function') {
+                currentPageUnsubscribe();
+                currentPageUnsubscribe = null;
+            }
+            
+            window.scrollTo(0, 0);
+            
+            if (pages[page]) {
+                await pages[page]();
+            } else {
+                await pages.home(); // Default to home
+            }
+            
+            // Wait a moment for content to be in DOM, then run animations
+            setTimeout(() => {
+                runPageAnimations(page);
+            }, 100);
+        };
+
+        // --- Theme Management ---
+        const themes = {
+            light: {
+                '--background-main': '#fdfcfa',
+                '--background-alt': '#f8fafc',
+                '--background-card': '#ffffff',
+                '--text-primary': '#1f2937',
+                '--text-secondary': '#4b5563',
+                '--primary': '#2563eb',
+                '--accent': '#D4AF37',
+            },
+            dark: {
+                '--background-main': '#111827',
+                '--background-alt': '#1f2937',
+                '--background-card': '#374151',
+                '--text-primary': '#f9fafb',
+                '--text-secondary': '#d1d5db',
+                '--primary': '#3b82f6',
+                '--accent': '#FBBF24',
+            },
+            serene: {
+                '--background-main': '#f0fdf4',
+                '--background-alt': '#dcfce7',
+                '--background-card': '#ffffff',
+                '--text-primary': '#14532d',
+                '--text-secondary': '#166534',
+                '--primary': '#22c55e',
+                '--accent': '#f97316',
+            }
+        };
+        let currentThemeIndex = 0;
+        const themeNames = Object.keys(themes);
+
+        const applyTheme = (themeName) => {
+            const theme = themes[themeName];
+            for (const [key, value] of Object.entries(theme)) {
+                document.documentElement.style.setProperty(key, value);
+            }
+            localStorage.setItem('srian-theme', themeName);
+        };
+
+        const cycleTheme = () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themeNames.length;
+            const newThemeName = themeNames[currentThemeIndex];
+            applyTheme(newThemeName);
+        };
+
+        // --- Social Links ---
+        const renderSocialLinks = async () => {
+            const container = document.getElementById('social-links-container');
+            if (!container) return;
+            
+            // Using mock data for now, can be replaced with Firestore fetch
+            const socialLinks = {
+                facebook: "https://facebook.com",
+                twitter: "https://twitter.com",
+                instagram: "https://instagram.com"
+            };
+
+            let html = '';
+            if (socialLinks.facebook) {
+                html += `<a href="${socialLinks.facebook}" target="_blank" class="text-2xl hover:text-blue-500 transition-colors"><i class="fab fa-facebook-f"></i></a>`;
+            }
+            if (socialLinks.twitter) {
+                html += `<a href="${socialLinks.twitter}" target="_blank" class="text-2xl hover:text-blue-400 transition-colors"><i class="fab fa-twitter"></i></a>`;
+            }
+            if (socialLinks.instagram) {
+                html += `<a href="${socialLinks.instagram}" target="_blank" class="text-2xl hover:text-pink-500 transition-colors"><i class="fab fa-instagram"></i></a>`;
+            }
+            container.innerHTML = html;
+        };
+
+        // --- Gemini API Feature ---
+        const generateThankYouNote = async (name, amount) => {
+            const generateBtn = document.getElementById('generate-note-btn');
+            const noteContainer = document.getElementById('note-container');
+            const noteTextarea = document.getElementById('thank-you-note');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            generateBtn.style.display = 'none';
+            loadingSpinner.style.display = 'flex';
+
+            const prompt = `Generate a short, heartfelt thank you message for a donation to our charity, the Srian Foundation. The donor's name is ${name} and they pledged ₹${amount}. Mention our work with feeding and educating children. Keep it under 50 words and sign it from 'The Srian Foundation Team'.`;
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Leave empty
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    noteTextarea.value = text;
+                    noteContainer.style.display = 'block';
+
+                    document.getElementById('copy-note-btn').addEventListener('click', () => {
+                        noteTextarea.select();
+                        document.execCommand('copy');
+                        showModal("Copied to clipboard!");
+                    });
+                } else {
+                    throw new Error("No content generated.");
+                }
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                noteTextarea.value = "Sorry, we couldn't generate a message at this time. But please know we are incredibly grateful for your support!";
+                noteContainer.style.display = 'block';
+            } finally {
+                loadingSpinner.style.display = 'none';
+            }
+        };
+        
+        const loadLogo = () => {
+            const logoEl = document.getElementById('website-logo');
+            if (!logoEl) return;
+            const logoRef = doc(db, "settings", "logo");
+            onSnapshot(logoRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().url) {
+                    logoEl.src = docSnap.data().url;
+                }
+            });
+        };
+
 
         // --- App Initialization ---
         const initApp = async () => {
@@ -1159,12 +1519,18 @@
             mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
             
             // Attach nav link listeners
-            document.querySelectorAll('.nav-link').forEach(link => {
+            document.querySelectorAll('.nav-link, .nav-item').forEach(link => {
                 link.addEventListener('click', (e) => {
                     handleNavClick(e);
                     mobileMenu.classList.add('hidden'); // Close menu on navigation
                 });
             });
+
+            // Setup Theme Switcher
+            const savedTheme = localStorage.getItem('srian-theme') || 'light';
+            currentThemeIndex = themeNames.indexOf(savedTheme);
+            applyTheme(savedTheme);
+            document.getElementById('theme-switcher').addEventListener('click', cycleTheme);
 
             // Firebase setup
             const firebaseConfig = {
@@ -1180,14 +1546,33 @@
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            setLogLevel('debug');
+            setLogLevel('error'); // Set to 'debug' for development
             
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+            });
+
             try {
+                await auth.authStateReady();
+                
+                // Fade out preloader and show app
+                gsap.to(preloader, { 
+                    duration: 0.5, 
+                    opacity: 0, 
+                    onComplete: () => preloader.style.display = 'none' 
+                });
+                gsap.to(appShell, { duration: 0.5, opacity: 1, delay: 0.2 });
+
                 if (auth.currentUser === null) {
                     await signInAnonymously(auth);
                 }
                 console.log("Firebase base authentication successful.");
-                navigateTo('home');
+                
+                // Initial page load
+                loadLogo();
+                pages.home();
+                runPageAnimations('home');
+                renderSocialLinks();
                 
                 // --- Initialize Live Features ---
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -1226,7 +1611,22 @@
                 console.error("Firebase authentication failed:", error);
                 showModal("Could not connect to the service. Please try again later.");
                 mainContent.innerHTML = `<div class="text-center py-20"><p>Application failed to start.</p></div>`;
+                preloader.style.display = 'none';
+                appShell.style.opacity = 1;
             }
+
+            // Animate footer on scroll
+            gsap.from(".footer-item", {
+                scrollTrigger: {
+                    trigger: "footer",
+                    start: "top 95%",
+                },
+                duration: 0.8,
+                opacity: 0,
+                y: 30,
+                stagger: 0.15,
+                ease: 'power3.out'
+            });
         };
 
         // --- Start the App ---
