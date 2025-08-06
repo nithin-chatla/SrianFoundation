@@ -156,6 +156,13 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .progress-bar-bg {
+            background-color: #e5e7eb; /* gray-200 */
+        }
+        .progress-bar-fill {
+            background-color: var(--primary);
+            transition: width 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -174,6 +181,7 @@
                 </a>
                 <nav class="hidden md:flex space-x-6 items-center text-[var(--text-secondary)]">
                     <a href="#" data-page="home" class="nav-item hover:text-[var(--primary)] transition-colors">Home</a>
+                    <a href="#" data-page="goals" class="nav-item hover:text-[var(--primary)] transition-colors">Goals</a>
                     <a href="#" data-page="donors" class="nav-item hover:text-[var(--primary)] transition-colors">Our Donors</a>
                     <a href="#" data-page="gallery" class="nav-item hover:text-[var(--primary)] transition-colors">Gallery</a>
                     <a href="#" data-page="about" class="nav-item hover:text-[var(--primary)] transition-colors">About Us</a>
@@ -185,6 +193,7 @@
             </div>
             <div id="mobile-menu" class="hidden md:hidden bg-[var(--background-card)] border-t border-[var(--background-alt)]">
                 <a href="#" data-page="home" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Home</a>
+                <a href="#" data-page="goals" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Goals</a>
                 <a href="#" data-page="donors" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Our Donors</a>
                 <a href="#" data-page="gallery" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">Gallery</a>
                 <a href="#" data-page="about" class="nav-link block py-3 px-4 hover:bg-[var(--background-alt)]">About Us</a>
@@ -254,8 +263,11 @@
             </div>
         </section>
 
+        <!-- Featured Goal Section -->
+        <section id="goal-preview-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+
         <!-- Our Mission Section -->
-        <section class="section-padding bg-[var(--background-alt)] overflow-hidden">
+        <section class="section-padding bg-[var(--background-card)] overflow-hidden">
             <div class="container mx-auto px-4 text-center">
                 <div class="section-title">
                     <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">An Enduring Commitment 💖</h2>
@@ -279,16 +291,30 @@
         </section>
         
         <!-- Testimonials Section -->
-        <section id="testimonials-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+        <section id="testimonials-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
 
         <!-- Donation Form Section -->
-        <section id="donate-form-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+        <section id="donate-form-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
         
         <!-- Photo Gallery Preview Section -->
-        <section id="gallery-preview-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+        <section id="gallery-preview-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
 
         <!-- Contact Section on Home Page -->
-        <section id="home-contact-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+        <section id="home-contact-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+    </template>
+
+    <template id="template-goals">
+        <div class="section-padding bg-[var(--background-alt)] min-h-screen overflow-hidden">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 section-title">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Our Fundraising Goals 🎯</h1>
+                    <p class="mt-4 text-lg text-[var(--text-secondary)]">See how your contributions are making a difference in real-time.</p>
+                </div>
+                <div id="goals-container" class="space-y-12">
+                    <!-- Goals will be rendered here -->
+                </div>
+            </div>
+        </div>
     </template>
 
     <template id="template-donors">
@@ -398,7 +424,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, setLogLevel, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, setLogLevel, doc, getDoc, setDoc, deleteDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- App State & Elements ---
         const mainContent = document.getElementById('main-content');
@@ -491,7 +517,17 @@
         };
 
         // --- Reusable Component Renderers ---
-        const renderDonationForm = (container) => {
+        const renderDonationForm = async (container) => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
+            const goalsSnapshot = await getDocs(query(collection(db, goalsCollectionPath)));
+            const goals = goalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            let goalsOptions = '<option value="">General Donation</option>';
+            if (goals.length > 0) {
+                goalsOptions += goals.map(goal => `<option value="${goal.id}">${goal.title}</option>`).join('');
+            }
+
             container.innerHTML = `
                 <div class="container mx-auto px-4 text-center">
                     <div class="section-title">
@@ -517,6 +553,12 @@
                                     <label for="amount" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Pledge Amount (INR)</label>
                                     <input type="number" name="amount" id="amount" placeholder="e.g., 5000" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" required />
                                 </div>
+                            </div>
+                             <div>
+                                <label for="goal" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Support a Specific Goal (Optional)</label>
+                                <select name="goal" id="goal" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]">
+                                    ${goalsOptions}
+                                </select>
                             </div>
                             <div class="text-center pt-4">
                                 <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-4 rounded-full shadow-lg w-full hover:opacity-90 transition-colors disabled:bg-gray-400">
