@@ -397,7 +397,7 @@
     <!-- Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, sessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, setLogLevel, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- App State & Elements ---
@@ -864,6 +864,7 @@
             container.querySelector('#admin-google-login-btn').addEventListener('click', async () => {
                 const provider = new GoogleAuthProvider();
                 try {
+                    await setPersistence(auth, sessionPersistence);
                     const result = await signInWithPopup(auth, provider);
                     const userIsAdmin = await isAdmin(result.user.email);
                     if (!userIsAdmin) {
