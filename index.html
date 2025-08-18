@@ -21,9 +21,9 @@
             --background-main: #fdfcfa;
             --background-alt: #f8fafc; /* gray-50 */
             --background-card: #ffffff;
-            --text-primary: #1f2937;   /* gray-800 */
+            --text-primary: #1f2937;    /* gray-800 */
             --text-secondary: #4b5563; /* gray-600 */
-            --primary: #2563eb;       /* blue-600 */
+            --primary: #2563eb;        /* blue-600 */
             --accent: #D4AF37;
         }
 
@@ -51,11 +51,11 @@
         }
 
         #app-shell {
-            opacity: 0; /* Initially hidden */
+            opacity: 1; /* Make sure the app is visible */
         }
 
         /* Input focus style */
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             box-shadow: 0 0 0 2px var(--primary);
             border-color: var(--primary);
@@ -74,7 +74,7 @@
             background-color: var(--background-card); 
             padding: 2rem;
             border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center; max-width: 90%; width: 400px;
+            text-align: center; max-width: 90%; width: 500px;
             transform: scale(0.9); transition: transform 0.3s ease;
         }
         .modal-backdrop.visible .modal-content { transform: scale(1); }
@@ -163,6 +163,10 @@
             background-color: var(--primary);
             transition: width 0.5s ease-in-out;
         }
+        .goal-image-aspect {
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +237,14 @@
             </div>
         </div>
     </div>
+    
+    <!-- Goal Details Modal -->
+    <div id="goal-details-modal" class="modal-backdrop">
+        <div id="goal-modal-content" class="modal-content">
+            <!-- Goal details will be rendered here -->
+        </div>
+    </div>
+
 
     <!-- Theme Switcher -->
     <button id="theme-switcher" title="Cycle Themes">
@@ -241,6 +253,9 @@
 
     <!-- Page Templates -->
     <template id="template-home">
+        <!-- Banner Section -->
+        <section id="banner-section" class="bg-yellow-400 text-yellow-900 text-center p-3 font-semibold hidden"></section>
+
         <!-- Hero Section -->
         <section class="hero-section bg-gradient-to-br from-blue-50 to-yellow-50 relative overflow-hidden">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-between section-padding px-4">
@@ -304,21 +319,21 @@
     </template>
 
     <template id="template-goals">
-        <div class="section-padding bg-[var(--background-alt)] min-h-screen overflow-hidden">
+        <div class="section-padding bg-[var(--background-alt)]">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Our Fundraising Goals 🎯</h1>
                     <p class="mt-4 text-lg text-[var(--text-secondary)]">See how your contributions are making a difference in real-time.</p>
                 </div>
-                <div id="goals-container" class="space-y-12">
-                    <!-- Goals will be rendered here -->
+                <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Goals will be rendered here by JavaScript -->
                 </div>
             </div>
         </div>
     </template>
 
     <template id="template-donors">
-        <div class="section-padding bg-[var(--background-alt)] min-h-screen overflow-hidden">
+        <div class="section-padding bg-[var(--background-alt)]">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Our Wall of Heroes ⭐</h1>
@@ -343,15 +358,15 @@
     </template>
     
     <template id="template-gallery">
-        <div class="section-padding bg-[var(--background-card)] min-h-screen overflow-hidden">
+        <div class="section-padding bg-[var(--background-card)]">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Moments We Cherish 📸</h1>
                     <p class="mt-4 text-lg text-[var(--text-secondary)]">Moments of joy and hope, made possible by you.</p>
                 </div>
                  <div class="max-w-xl mx-auto mb-12">
-                    <input type="text" id="gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" />
-                </div>
+                     <input type="text" id="gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]" />
+                 </div>
                 <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <!-- Gallery images will be rendered here -->
                 </div>
@@ -360,7 +375,7 @@
     </template>
 
     <template id="template-about">
-        <div class="section-padding bg-[var(--background-card)] overflow-hidden">
+        <div class="section-padding bg-[var(--background-card)]">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">The Heart of Our Mission ❤️</h1>
@@ -385,7 +400,7 @@
     </template>
 
     <template id="template-contact">
-        <div class="section-padding bg-[var(--background-alt)] overflow-hidden">
+        <div class="section-padding bg-[var(--background-alt)]">
             <div class="container mx-auto px-4">
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Let's Connect 🤝</h1>
@@ -413,7 +428,7 @@
     </template>
     
     <template id="template-admin">
-        <div class="section-padding bg-gray-100 min-h-screen">
+        <div class="section-padding bg-gray-100">
             <div id="admin-view-container">
                 <!-- Admin Login or Dashboard will be rendered here -->
             </div>
@@ -424,15 +439,14 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, setLogLevel, doc, getDoc, setDoc, deleteDoc, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, setLogLevel, doc, getDoc, setDoc, deleteDoc, where, getDocs, orderBy, limit, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- App State & Elements ---
-        const mainContent = document.getElementById('main-content');
-        const appShell = document.getElementById('app-shell');
-        const preloader = document.getElementById('preloader');
+        let mainContent, appShell, preloader;
         let db, auth;
         let currentUser = null;
         let currentPageUnsubscribe = null; // Variable to hold the unsubscribe function
+        let allGoalsData = []; // Cache for goal data
         
         // --- GSAP Plugin Registration ---
         gsap.registerPlugin(ScrollTrigger);
@@ -445,6 +459,8 @@
         const modal = document.getElementById('custom-modal');
         const modalMessage = document.getElementById('modal-message');
         const modalButtons = document.getElementById('modal-buttons');
+        const goalDetailsModal = document.getElementById('goal-details-modal');
+        const goalModalContent = document.getElementById('goal-modal-content');
 
         const showModal = (message, content = '') => {
             modalMessage.textContent = message;
@@ -455,6 +471,39 @@
 
         const hideModal = () => {
             modal.classList.remove('visible');
+        };
+
+        const showGoalDetailsModal = (goal) => {
+            const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+            goalModalContent.innerHTML = `
+                <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover mb-4">
+                <h2 class="text-2xl font-bold text-[var(--text-primary)]">${goal.title}</h2>
+                <p class="mt-2 text-[var(--text-secondary)] text-left">${goal.description}</p>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-1 text-sm font-medium text-[var(--text-secondary)]">
+                        <span>₹${goal.currentAmount.toLocaleString('en-IN')}</span>
+                        <span>₹${goal.targetAmount.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="w-full progress-bar-bg rounded-full h-2.5">
+                        <div class="progress-bar-fill h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                    <p class="text-right text-sm font-bold text-[var(--primary)] mt-1">${percentage.toFixed(0)}% Funded</p>
+                </div>
+                <div class="mt-6 flex gap-4">
+                     <a href="#" data-page="home" data-scroll-to="donate-form-section" class="nav-link bg-[var(--accent)] text-white font-semibold px-6 py-2 rounded-full hover:opacity-90 transition-colors w-full">Donate</a>
+                     <button id="close-goal-modal" class="bg-gray-200 text-gray-800 font-semibold px-6 py-2 rounded-full hover:bg-gray-300 w-full">Close</button>
+                </div>
+            `;
+            goalDetailsModal.classList.add('visible');
+            goalDetailsModal.querySelector('.nav-link').addEventListener('click', (e) => {
+                hideGoalDetailsModal();
+                handleNavClick(e);
+            });
+            goalDetailsModal.querySelector('#close-goal-modal').addEventListener('click', hideGoalDetailsModal);
+        };
+
+        const hideGoalDetailsModal = () => {
+            goalDetailsModal.classList.remove('visible');
         };
         
         const showConfirmModal = (message) => {
@@ -488,6 +537,11 @@
                 }
             }
         });
+        goalDetailsModal.addEventListener('click', (e) => {
+            if (e.target === goalDetailsModal) {
+                hideGoalDetailsModal();
+            }
+        });
         
         // --- Helper Functions ---
         const uploadImageCloudinary = async (file) => {
@@ -517,6 +571,57 @@
         };
 
         // --- Reusable Component Renderers ---
+        const renderFeaturedGoal = async (container) => {
+            if (!container) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
+            const q = query(collection(db, goalsCollectionPath), orderBy("createdAt", "desc"), limit(1));
+
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) {
+                container.style.display = 'none';
+                return;
+            }
+
+            const doc = snapshot.docs[0];
+            const goal = { id: doc.id, ...doc.data() };
+            const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+
+            container.innerHTML = `
+                <div class="container mx-auto px-4 text-center">
+                    <div class="section-title">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Our Featured Goal 🌟</h2>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Help us reach our latest milestone and make a direct impact.</p>
+                    </div>
+                    <div class="goal-card mt-12 max-w-4xl mx-auto bg-[var(--background-card)] rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row items-center gap-8 p-8">
+                        <div class="md:w-1/3">
+                            <img src="${goal.imageUrl}" alt="${goal.title}" class="rounded-lg w-full h-48 object-cover">
+                        </div>
+                        <div class="md:w-2/3 text-left">
+                            <h3 class="text-2xl font-bold text-[var(--text-primary)]">${goal.title}</h3>
+                            <p class="mt-2 text-[var(--text-secondary)]">${goal.description}</p>
+                            <div class="mt-4">
+                                <div class="flex justify-between items-center mb-1 text-sm font-medium text-[var(--text-secondary)]">
+                                    <span>₹${goal.currentAmount.toLocaleString('en-IN')} Raised</span>
+                                    <span>Target: ₹${goal.targetAmount.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="w-full progress-bar-bg rounded-full h-2.5">
+                                    <div class="progress-bar-fill h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <p class="text-right text-sm font-bold text-[var(--primary)] mt-1">${percentage.toFixed(0)}% Funded</p>
+                            </div>
+                            <div class="mt-6">
+                                 <a href="#" data-page="goals" class="nav-link bg-[var(--primary)] text-white font-semibold px-6 py-2 rounded-full hover:opacity-90 transition-colors">View All Goals</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.style.display = 'block';
+            animateOnScroll('.goal-card', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+            container.querySelector('.nav-link').addEventListener('click', handleNavClick);
+        };
+
         const renderDonationForm = async (container) => {
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
@@ -555,11 +660,11 @@
                                 </div>
                             </div>
                              <div>
-                                <label for="goal" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Support a Specific Goal (Optional)</label>
-                                <select name="goal" id="goal" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]">
-                                    ${goalsOptions}
-                                </select>
-                            </div>
+                                 <label for="goal" class="block text-left text-sm font-medium text-[var(--text-secondary)] mb-1">Support a Specific Goal (Optional)</label>
+                                 <select name="goal" id="goal" class="p-3 border rounded-lg w-full transition bg-[var(--background-alt)] text-[var(--text-primary)]">
+                                     ${goalsOptions}
+                                 </select>
+                             </div>
                             <div class="text-center pt-4">
                                 <button type="submit" class="bg-[var(--primary)] text-white text-lg font-semibold px-10 py-4 rounded-full shadow-lg w-full hover:opacity-90 transition-colors disabled:bg-gray-400">
                                     Submit Pledge
@@ -600,9 +705,9 @@
 
         const renderGalleryPreview = (container) => {
              const galleryImages = [
-                'https://picsum.photos/seed/event1/400/400', 'https://picsum.photos/seed/event2/400/400',
-                'https://picsum.photos/seed/event3/400/400', 'https://picsum.photos/seed/event4/400/400',
-            ];
+                 'https://picsum.photos/seed/event1/400/400', 'https://picsum.photos/seed/event2/400/400',
+                 'https://picsum.photos/seed/event3/400/400', 'https://picsum.photos/seed/event4/400/400',
+             ];
             container.innerHTML = `
                 <div class="container mx-auto px-4 text-center">
                     <div class="section-title">
@@ -689,8 +794,8 @@
             
             if (page === 'gallery') {
                  document.querySelectorAll('.gallery-item').forEach((item) => {
-                    animateOnScroll(item, { opacity: 0, scale: 0.8, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05 });
-                });
+                     animateOnScroll(item, { opacity: 0, scale: 0.8, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.05 });
+                 });
             }
             
             if (page === 'about') {
@@ -699,7 +804,7 @@
             }
             
              if (page === 'contact') {
-                animateOnScroll('.contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
+                 animateOnScroll('.contact-form-container', { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
             }
         };
 
@@ -710,11 +815,61 @@
                 const template = document.getElementById('template-home');
                 mainContent.innerHTML = '';
                 mainContent.appendChild(template.content.cloneNode(true));
+                renderBanner(mainContent.querySelector('#banner-section'));
+                renderFeaturedGoal(mainContent.querySelector('#goal-preview-section'));
                 renderTestimonials(mainContent.querySelector('#testimonials-section'));
                 renderDonationForm(mainContent.querySelector('#donate-form-section'));
                 renderGalleryPreview(mainContent.querySelector('#gallery-preview-section'));
                 renderContactSection(mainContent.querySelector('#home-contact-section'));
                 mainContent.querySelectorAll('.nav-link, .nav-item').forEach(link => link.addEventListener('click', handleNavClick));
+            },
+            goals: () => {
+                const template = document.getElementById('template-goals');
+                mainContent.innerHTML = '';
+                mainContent.appendChild(template.content.cloneNode(true));
+                const goalsContainer = mainContent.querySelector('#goals-container');
+                goalsContainer.innerHTML = `<div class="flex justify-center items-center p-20"><div class="spinner"></div></div>`;
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
+                const q = query(collection(db, goalsCollectionPath));
+
+                currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        goalsContainer.innerHTML = `<p class="text-center text-[var(--text-secondary)]">No fundraising goals have been set yet. Check back soon!</p>`;
+                        return;
+                    }
+                    allGoalsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    goalsContainer.innerHTML = allGoalsData.map(goal => {
+                        return `
+                            <div class="goal-card hover-card bg-[var(--background-card)] rounded-2xl shadow-lg overflow-hidden flex flex-col">
+                                <img src="${goal.imageUrl}" alt="${goal.title}" class="w-full h-64 goal-image-aspect">
+                                <div class="p-6 flex flex-col flex-grow">
+                                    <h3 class="text-xl font-bold text-[var(--text-primary)]">${goal.title}</h3>
+                                    <p class="mt-2 text-sm text-[var(--text-secondary)] flex-grow">${goal.description.substring(0, 100)}...</p>
+                                    <div class="mt-4">
+                                        <button data-goal-id="${goal.id}" class="view-goal-details-btn bg-[var(--primary)] text-white font-semibold px-6 py-2 rounded-full w-full hover:opacity-90 transition-colors">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.querySelectorAll('.goal-card').forEach((card, index) => {
+                        animateOnScroll(card, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: index * 0.1 });
+                    });
+
+                    document.querySelectorAll('.view-goal-details-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const goalId = e.target.dataset.goalId;
+                            const goal = allGoalsData.find(g => g.id === goalId);
+                            if (goal) {
+                                showGoalDetailsModal(goal);
+                            }
+                        });
+                    });
+                });
             },
             donors: () => {
                 const template = document.getElementById('template-donors');
@@ -932,12 +1087,39 @@
                         </div>
                     </div>
                     
+                    <!-- Manage Banner Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Homepage Banner</h2>
+                        <form id="banner-form" class="space-y-4">
+                            <input type="text" name="bannerText" placeholder="Banner Text (e.g., Special Event Today!)" class="p-3 border rounded-lg w-full" />
+                            <div class="flex items-center gap-4">
+                                <input type="checkbox" id="banner-enabled" name="bannerEnabled" class="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
+                                <label for="banner-enabled" class="text-gray-700">Enable Banner</label>
+                            </div>
+                            <button type="submit" class="bg-teal-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-teal-600">Update Banner</button>
+                        </form>
+                    </div>
+
                     <!-- Manage Logo Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Logo</h2>
                         <form id="logo-form" class="space-y-4">
                             <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full" required />
                             <button type="submit" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-indigo-700 disabled:bg-gray-400">Upload New Logo</button>
+                        </form>
+                    </div>
+
+                    <!-- Manage Goals Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Goals</h2>
+                        <div id="admin-goals-list" class="space-y-4 mb-6"></div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add New Goal</h3>
+                        <form id="add-goal-form" class="space-y-4">
+                            <input type="text" name="title" placeholder="Goal Title" class="p-3 border rounded-lg w-full" required />
+                            <textarea name="description" placeholder="Description" class="p-3 border rounded-lg w-full h-24" required></textarea>
+                            <input type="number" name="targetAmount" placeholder="Target Amount (INR)" class="p-3 border rounded-lg w-full" required />
+                            <input type="file" name="imageFile" accept="image/*" class="p-2 border rounded-lg w-full" required />
+                            <button type="submit" class="bg-green-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-green-600 disabled:bg-gray-400">Add Goal</button>
                         </form>
                     </div>
 
@@ -972,8 +1154,8 @@
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Gallery</h2>
                          <div class="mb-4">
-                            <input type="text" id="admin-gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full" />
-                        </div>
+                             <input type="text" id="admin-gallery-search" placeholder="Search by location..." class="p-3 border rounded-lg w-full" />
+                         </div>
                         <div id="admin-gallery-list" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
                         <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add Gallery Image</h3>
                         <form id="add-gallery-form" class="space-y-4">
@@ -1022,9 +1204,15 @@
                 navigateTo('admin');
             });
             
+            // Add Banner Form Logic
+            container.querySelector('#banner-form').addEventListener('submit', handleBannerUpdate);
+
             // Add Logo Form Logic
             container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
             
+            // Add Goal Form Logic
+            container.querySelector('#add-goal-form').addEventListener('submit', handleAddGoal);
+
             // Add Donor Form Logic
             container.querySelector('#add-donor-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -1117,6 +1305,8 @@
             });
             
             // Load initial data for the dashboard
+            loadAdminBannerForm();
+            loadAdminGoalsList();
             loadAdminDonorsList();
             loadAdminGalleryList();
             loadAdminPledgesList();
@@ -1135,9 +1325,9 @@
 
             const renderTable = (donors) => {
                  if (donors.length === 0) {
-                    container.innerHTML = `<p class="text-center text-gray-500">No donors found.</p>`;
-                    return;
-                }
+                     container.innerHTML = `<p class="text-center text-gray-500">No donors found.</p>`;
+                     return;
+                 }
                 container.innerHTML = `<table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b">
@@ -1326,11 +1516,27 @@
             }
         };
 
+        const loadAdminBannerForm = async () => {
+            const form = document.getElementById('banner-form');
+            if (!form) return;
+            const bannerRef = doc(db, "settings", "banner");
+            const bannerSnap = await getDoc(bannerRef);
+            if (bannerSnap.exists()) {
+                const data = bannerSnap.data();
+                form.bannerText.value = data.text || '';
+                form.bannerEnabled.checked = data.enabled || false;
+            }
+        };
+
         // --- Event Handlers ---
         const handleNavClick = (e) => {
             e.preventDefault();
             const page = e.currentTarget.dataset.page;
-            navigateTo(page);
+            const scrollToId = e.currentTarget.dataset.scrollTo;
+
+            if (page) {
+                navigateTo(page, scrollToId);
+            }
         };
 
         const handleDonationSubmit = async (e) => {
@@ -1406,9 +1612,141 @@
                 form.reset();
             }
         };
+
+        const handleBannerUpdate = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const bannerData = {
+                text: form.bannerText.value,
+                enabled: form.bannerEnabled.checked
+            };
+            try {
+                await setDoc(doc(db, "settings", "banner"), bannerData);
+                showModal("Banner updated successfully!");
+            } catch (error) {
+                showModal("Error updating banner: " + error.message);
+            }
+        };
+
+        const handleAddGoal = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button');
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+
+            const imageFile = form.imageFile.files[0];
+            if (!imageFile) {
+                showModal("Please select an image for the goal.");
+                button.disabled = false;
+                button.textContent = 'Add Goal';
+                return;
+            }
+
+            try {
+                const imageUrl = await uploadImageCloudinary(imageFile);
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
+                
+                await addDoc(collection(db, goalsCollectionPath), {
+                    title: form.title.value,
+                    description: form.description.value,
+                    targetAmount: Number(form.targetAmount.value),
+                    currentAmount: 0,
+                    imageUrl: imageUrl,
+                    createdAt: new Date()
+                });
+                showModal('Goal added successfully!');
+                form.reset();
+            } catch (error) {
+                showModal('Error adding goal: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Add Goal';
+            }
+        };
+        
+        const handleUpdateGoal = async (e) => {
+            const docId = e.target.dataset.id;
+            const input = document.getElementById(`amount-${docId}`);
+            const newAmount = Number(input.value);
+
+            if (isNaN(newAmount) || newAmount < 0) {
+                showModal("Please enter a valid amount.");
+                return;
+            }
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const goalDocRef = doc(db, `/artifacts/${appId}/public/data/goals`, docId);
+
+            try {
+                await updateDoc(goalDocRef, {
+                    currentAmount: newAmount
+                });
+                showModal("Goal amount updated successfully!");
+            } catch (error) {
+                showModal("Error updating goal: " + error.message);
+                console.error("Error updating goal:", error);
+            }
+        };
+
+        const loadAdminGoalsList = () => {
+            const container = document.getElementById('admin-goals-list');
+            if (!container) return;
+            container.innerHTML = `<p class="text-center text-gray-500">Loading goals...</p>`;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const goalsCollectionPath = `/artifacts/${appId}/public/data/goals`;
+            const q = query(collection(db, goalsCollectionPath), orderBy("createdAt", "desc"));
+
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-center text-gray-500">No goals created yet.</p>`;
+                    return;
+                }
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const goal = doc.data();
+                    const goalId = doc.id;
+                    return `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="font-semibold">${goal.title}</p>
+                                <p class="text-sm text-gray-500">Target: ₹${goal.targetAmount.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="amount-${goalId}" value="${goal.currentAmount}" class="p-2 border rounded-lg w-full" placeholder="Current Amount" />
+                                <button data-id="${goalId}" class="update-goal-btn bg-blue-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-600">Update</button>
+                            </div>
+                            <div class="text-right">
+                                <button data-id="${goalId}" class="delete-goal-btn text-red-500 hover:text-red-700">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.querySelectorAll('.delete-goal-btn').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        const confirmed = await showConfirmModal('Are you sure you want to delete this goal?');
+                        if (confirmed) {
+                            try {
+                                await deleteDoc(doc(db, goalsCollectionPath, docId));
+                                showModal('Goal deleted successfully.');
+                            } catch (error) {
+                                showModal('Error deleting goal: ' + error.message);
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.update-goal-btn').forEach(button => {
+                    button.addEventListener('click', handleUpdateGoal);
+                });
+            });
+        };
         
         // --- Router ---
-        const navigateTo = async (page) => {
+        const navigateTo = async (page, scrollToId = null) => {
             // Detach any active Firestore listeners from the previous page
             if (typeof currentPageUnsubscribe === 'function') {
                 currentPageUnsubscribe();
@@ -1426,6 +1764,12 @@
             // Wait a moment for content to be in DOM, then run animations
             setTimeout(() => {
                 runPageAnimations(page);
+                if (scrollToId) {
+                    const element = document.getElementById(scrollToId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
             }, 100);
         };
 
@@ -1501,6 +1845,19 @@
             container.innerHTML = html;
         };
 
+        const renderBanner = async (container) => {
+            if (!container) return;
+            const bannerRef = doc(db, "settings", "banner");
+            onSnapshot(bannerRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().enabled && docSnap.data().text) {
+                    container.textContent = docSnap.data().text;
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            });
+        };
+
         // --- Gemini API Feature ---
         const generateThankYouNote = async (name, amount) => {
             const generateBtn = document.getElementById('generate-note-btn');
@@ -1562,6 +1919,10 @@
 
         // --- App Initialization ---
         const initApp = async () => {
+            mainContent = document.getElementById('main-content');
+            appShell = document.getElementById('app-shell');
+            preloader = document.getElementById('preloader');
+
             // Setup mobile menu
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -1619,8 +1980,7 @@
                 
                 // Initial page load
                 loadLogo();
-                pages.home();
-                runPageAnimations('home');
+                navigateTo('home');
                 renderSocialLinks();
                 
                 // --- Initialize Live Features ---
