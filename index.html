@@ -1992,8 +1992,8 @@
                 
                 // Initial page load based on URL hash
                 const initialPage = window.location.hash.substring(1) || 'home';
+                loadLogo();
                 navigateTo(initialPage);
-                
                 renderSocialLinks();
                 
                 // --- Initialize Live Features ---
