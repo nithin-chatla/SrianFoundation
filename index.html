@@ -163,10 +163,6 @@
             background-color: var(--primary);
             transition: width 0.5s ease-in-out;
         }
-        .goal-image-aspect {
-            aspect-ratio: 3 / 4;
-            object-fit: cover;
-        }
     </style>
 </head>
 <body>
@@ -254,7 +250,7 @@
     <!-- Page Templates -->
     <template id="template-home">
         <!-- Banner Section -->
-        <section id="banner-section" class="bg-yellow-400 text-yellow-900 text-center p-3 font-semibold hidden"></section>
+        <section id="banner-section"></section>
 
         <!-- Hero Section -->
         <section class="hero-section bg-gradient-to-br from-blue-50 to-yellow-50 relative overflow-hidden">
@@ -844,7 +840,7 @@
                     goalsContainer.innerHTML = allGoalsData.map(goal => {
                         return `
                             <div class="goal-card hover-card bg-[var(--background-card)] rounded-2xl shadow-lg overflow-hidden flex flex-col">
-                                <img src="${goal.imageUrl}" alt="${goal.title}" class="w-full h-64 goal-image-aspect">
+                                <img src="${goal.imageUrl}" alt="${goal.title}" class="w-full h-64 object-cover">
                                 <div class="p-6 flex flex-col flex-grow">
                                     <h3 class="text-xl font-bold text-[var(--text-primary)]">${goal.title}</h3>
                                     <p class="mt-2 text-sm text-[var(--text-secondary)] flex-grow">${goal.description.substring(0, 100)}...</p>
@@ -1092,6 +1088,7 @@
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Homepage Banner</h2>
                         <form id="banner-form" class="space-y-4">
                             <input type="text" name="bannerText" placeholder="Banner Text (e.g., Special Event Today!)" class="p-3 border rounded-lg w-full" />
+                            <input type="url" name="bannerLink" placeholder="Banner Link (URL) - Optional" class="p-3 border rounded-lg w-full" />
                             <div class="flex items-center gap-4">
                                 <input type="checkbox" id="banner-enabled" name="bannerEnabled" class="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" />
                                 <label for="banner-enabled" class="text-gray-700">Enable Banner</label>
@@ -1524,6 +1521,7 @@
             if (bannerSnap.exists()) {
                 const data = bannerSnap.data();
                 form.bannerText.value = data.text || '';
+                form.bannerLink.value = data.link || '';
                 form.bannerEnabled.checked = data.enabled || false;
             }
         };
@@ -1618,6 +1616,7 @@
             const form = e.target;
             const bannerData = {
                 text: form.bannerText.value,
+                link: form.bannerLink.value,
                 enabled: form.bannerEnabled.checked
             };
             try {
@@ -1753,7 +1752,7 @@
                 currentPageUnsubscribe = null;
             }
             
-            window.scrollTo(0, 0);
+            history.pushState({ page: page }, '', `#${page}`);
             
             if (pages[page]) {
                 await pages[page]();
@@ -1769,8 +1768,20 @@
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth' });
                     }
+                } else {
+                    window.scrollTo(0, 0);
                 }
             }, 100);
+        };
+
+        window.onpopstate = (event) => {
+            if (event.state && event.state.page) {
+                navigateTo(event.state.page);
+            } else {
+                // Handle initial page load with hash
+                const page = window.location.hash.substring(1) || 'home';
+                navigateTo(page);
+            }
         };
 
         // --- Theme Management ---
@@ -1850,10 +1861,14 @@
             const bannerRef = doc(db, "settings", "banner");
             onSnapshot(bannerRef, (docSnap) => {
                 if (docSnap.exists() && docSnap.data().enabled && docSnap.data().text) {
-                    container.textContent = docSnap.data().text;
-                    container.classList.remove('hidden');
+                    const data = docSnap.data();
+                    if (data.link) {
+                        container.innerHTML = `<a href="${data.link}" target="_blank" rel="noopener noreferrer" class="block bg-yellow-400 text-yellow-900 text-center p-3 font-semibold hover:bg-yellow-500 transition-colors">${data.text}</a>`;
+                    } else {
+                        container.innerHTML = `<div class="bg-yellow-400 text-yellow-900 text-center p-3 font-semibold">${data.text}</div>`;
+                    }
                 } else {
-                    container.classList.add('hidden');
+                    container.innerHTML = '';
                 }
             });
         };
@@ -1978,9 +1993,10 @@
                 }
                 console.log("Firebase base authentication successful.");
                 
-                // Initial page load
-                loadLogo();
-                navigateTo('home');
+                // Initial page load based on URL hash
+                const initialPage = window.location.hash.substring(1) || 'home';
+                navigateTo(initialPage);
+                
                 renderSocialLinks();
                 
                 // --- Initialize Live Features ---
