@@ -47,6 +47,11 @@
             opacity: 1; /* Make sure the app is visible */
         }
 
+        /* Hide content initially to prevent FOUC */
+        #main-content, footer {
+            visibility: hidden;
+        }
+
         /* Input focus style */
         input:focus, textarea:focus, select:focus {
             outline: none;
@@ -252,7 +257,7 @@
                         For years, our community of supporters has been the driving force behind our mission to feed and educate. Join us in continuing this legacy of hope.
                     </p>
                     <div class="mt-10 hero-btn">
-                        <a href="#donate-form-section" class="bg-[var(--accent)] text-white text-lg font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition-transform inline-block">
+                        <a href="#donate-form-section" id="join-mission-btn" class="bg-[var(--accent)] text-white text-lg font-semibold px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition-transform inline-block">
                             Join Our Mission <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                     </div>
@@ -263,11 +268,14 @@
             </div>
         </section>
 
+        <!-- Our Impact Section -->
+        <section id="our-impact-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+
         <!-- Featured Goal Section -->
-        <section id="goal-preview-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+        <section id="goal-preview-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
 
         <!-- Our Mission Section -->
-        <section class="mission-section section-padding bg-[var(--background-card)] overflow-hidden">
+        <section class="mission-section section-padding bg-[var(--background-alt)] overflow-hidden">
             <div class="container mx-auto px-4 text-center">
                 <div class="section-title">
                     <h2 class="mission-title text-3xl md:text-4xl font-bold text-[var(--text-primary)]">An Enduring Commitment 💖</h2>
@@ -291,16 +299,16 @@
         </section>
         
         <!-- Testimonials Section -->
-        <section id="testimonials-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+        <section id="testimonials-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
 
         <!-- Donation Form Section -->
-        <section id="donate-form-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+        <section id="donate-form-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
         
         <!-- Photo Gallery Preview Section -->
-        <section id="gallery-preview-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
+        <section id="gallery-preview-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
 
         <!-- Contact Section on Home Page -->
-        <section id="home-contact-section" class="section-padding bg-[var(--background-card)] overflow-hidden"></section>
+        <section id="home-contact-section" class="section-padding bg-[var(--background-alt)] overflow-hidden"></section>
     </template>
 
     <template id="template-goals">
@@ -309,6 +317,9 @@
                 <div class="text-center mb-16 section-title">
                     <h1 class="text-4xl md:text-5xl font-bold text-[var(--text-primary)]">Our Fundraising Goals 🎯</h1>
                     <p class="mt-4 text-lg text-[var(--text-secondary)]">See how your contributions are making a difference in real-time.</p>
+                </div>
+                <div class="max-w-xl mx-auto mb-12">
+                    <input type="text" id="goal-search" placeholder="Search for a goal..." class="p-3 border rounded-lg w-full transition bg-[var(--background-card)] text-[var(--text-primary)]" />
                 </div>
                 <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Goals will be rendered here by JavaScript -->
@@ -556,6 +567,65 @@
         };
 
         // --- Reusable Component Renderers ---
+        const renderOurImpact = async (container) => {
+            if (!container) return;
+
+            const impactRef = doc(db, "settings", "impact");
+            const impactSnap = await getDoc(impactRef);
+            let impactData = { mealsServed: 0, studentsEducated: 0, volunteersEngaged: 0 };
+            if (impactSnap.exists()) {
+                impactData = impactSnap.data();
+            }
+
+            container.innerHTML = `
+                <div class="container mx-auto px-4 text-center">
+                    <div class="section-title">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Our Impact in Numbers</h2>
+                        <p class="mt-4 text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">Every number tells a story of a life changed. Here's what we've achieved together.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        <div class="impact-card text-center">
+                            <i class="fas fa-utensils text-4xl text-blue-500 mb-4"></i>
+                            <p class="text-5xl font-bold text-[var(--text-primary)]" id="meals-counter">${impactData.mealsServed}</p>
+                            <p class="text-lg text-[var(--text-secondary)] mt-2">Meals Served</p>
+                        </div>
+                        <div class="impact-card text-center">
+                            <i class="fas fa-graduation-cap text-4xl text-yellow-500 mb-4"></i>
+                            <p class="text-5xl font-bold text-[var(--text-primary)]" id="students-counter">${impactData.studentsEducated}</p>
+                            <p class="text-lg text-[var(--text-secondary)] mt-2">Students Educated</p>
+                        </div>
+                        <div class="impact-card text-center">
+                            <i class="fas fa-users text-4xl text-green-500 mb-4"></i>
+                            <p class="text-5xl font-bold text-[var(--text-primary)]" id="volunteers-counter">${impactData.volunteersEngaged}</p>
+                            <p class="text-lg text-[var(--text-secondary)] mt-2">Volunteers Engaged</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Animate counters
+            const animateCounter = (el, endValue) => {
+                let startValue = { val: 0 };
+                gsap.to(startValue, {
+                    val: endValue,
+                    duration: 2,
+                    ease: "power1.inOut",
+                    onUpdate: () => {
+                        el.textContent = Math.ceil(startValue.val).toLocaleString('en-IN');
+                    },
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none',
+                    }
+                });
+            };
+
+            animateCounter(container.querySelector('#meals-counter'), impactData.mealsServed);
+            animateCounter(container.querySelector('#students-counter'), impactData.studentsEducated);
+            animateCounter(container.querySelector('#volunteers-counter'), impactData.volunteersEngaged);
+        };
+
         const renderFeaturedGoal = async (container) => {
             if (!container) return;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -824,11 +894,26 @@
 
                 // Render other components
                 renderBanner(mainContent.querySelector('#banner-section'));
+                renderOurImpact(mainContent.querySelector('#our-impact-section'));
                 renderFeaturedGoal(mainContent.querySelector('#goal-preview-section'));
                 renderTestimonials(mainContent.querySelector('#testimonials-section'));
                 renderDonationForm(mainContent.querySelector('#donate-form-section'));
                 renderGalleryPreview(mainContent.querySelector('#gallery-preview-section'));
                 renderContactSection(mainContent.querySelector('#home-contact-section'));
+                
+                // Add specific event listener for the Join Mission button
+                const joinMissionBtn = mainContent.querySelector('#join-mission-btn');
+                if (joinMissionBtn) {
+                    joinMissionBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = e.currentTarget.getAttribute('href').substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                }
+
                 mainContent.querySelectorAll('.nav-link, .nav-item').forEach(link => link.addEventListener('click', handleNavClick));
             },
             goals: () => {
@@ -1109,6 +1194,28 @@
                         </form>
                     </div>
 
+                    <!-- Manage Impact Counters Section -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Impact Counters</h2>
+                        <form id="impact-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="impact-meals" class="block text-sm font-medium text-gray-700">Meals Served</label>
+                                    <input type="number" name="mealsServed" id="impact-meals" class="mt-1 p-2 border rounded-lg w-full" />
+                                </div>
+                                <div>
+                                    <label for="impact-students" class="block text-sm font-medium text-gray-700">Students Educated</label>
+                                    <input type="number" name="studentsEducated" id="impact-students" class="mt-1 p-2 border rounded-lg w-full" />
+                                </div>
+                                <div>
+                                    <label for="impact-volunteers" class="block text-sm font-medium text-gray-700">Volunteers Engaged</label>
+                                    <input type="number" name="volunteersEngaged" id="impact-volunteers" class="mt-1 p-2 border rounded-lg w-full" />
+                                </div>
+                            </div>
+                            <button type="submit" class="bg-cyan-500 text-white font-semibold px-8 py-3 rounded-full w-full hover:bg-cyan-600">Update Impact Stats</button>
+                        </form>
+                    </div>
+
                     <!-- Manage Logo Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Logo</h2>
@@ -1121,6 +1228,9 @@
                     <!-- Manage Goals Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Goals</h2>
+                        <div class="mb-4">
+                            <input type="text" id="admin-goal-search" placeholder="Search goals..." class="p-3 border rounded-lg w-full" />
+                        </div>
                         <div id="admin-goals-list" class="space-y-4 mb-6"></div>
                         <h3 class="text-xl font-bold text-gray-800 mb-4 pt-6 border-t">Add New Goal</h3>
                         <form id="add-goal-form" class="space-y-4">
@@ -1135,6 +1245,9 @@
                     <!-- Manage Pledges Section -->
                     <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Pledges</h2>
+                        <div class="mb-4">
+                            <input type="text" id="admin-pledge-search" placeholder="Search pledges..." class="p-3 border rounded-lg w-full" />
+                        </div>
                         <div id="admin-pledges-list" class="max-h-96 overflow-y-auto"></div>
                     </div>
 
@@ -1215,6 +1328,9 @@
             
             // Add Banner Form Logic
             container.querySelector('#banner-form').addEventListener('submit', handleBannerUpdate);
+
+            // Add Impact Form Logic
+            container.querySelector('#impact-form').addEventListener('submit', handleImpactUpdate);
 
             // Add Logo Form Logic
             container.querySelector('#logo-form').addEventListener('submit', handleLogoUpload);
@@ -1315,6 +1431,7 @@
             
             // Load initial data for the dashboard
             loadAdminBannerForm();
+            loadAdminImpactForm();
             loadAdminGoalsList();
             loadAdminDonorsList();
             loadAdminGalleryList();
@@ -1449,13 +1566,13 @@
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const pledgesCollectionPath = `/artifacts/${appId}/public/data/pledges`;
             const q = query(collection(db, pledgesCollectionPath));
+            let allPledges = [];
 
-            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
-                if (snapshot.empty) {
+            const renderTable = (pledges) => {
+                if (pledges.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500">No pledges yet.</p>`;
                     return;
                 }
-                const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
                 container.innerHTML = `<table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b">
@@ -1463,7 +1580,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                    ${sortedDocs.map(doc => {
+                    ${pledges.map(doc => {
                         const pledge = doc.data();
                         return `
                         <tr class="border-b border-gray-100">
@@ -1492,6 +1609,19 @@
                         }
                     });
                 });
+            };
+            
+            const searchInput = document.getElementById('admin-pledge-search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredPledges = allPledges.filter(doc => doc.data().name.toLowerCase().includes(searchTerm) || doc.data().phone.includes(searchTerm));
+                renderTable(filteredPledges);
+            });
+
+
+            currentPageUnsubscribe = onSnapshot(q, (snapshot) => {
+                allPledges = snapshot.docs.sort((a, b) => b.data().timestamp - a.data().timestamp);
+                renderTable(allPledges);
             });
         };
 
@@ -1535,6 +1665,19 @@
                 form.bannerText.value = data.text || '';
                 form.bannerLink.value = data.link || '';
                 form.bannerEnabled.checked = data.enabled || false;
+            }
+        };
+
+        const loadAdminImpactForm = async () => {
+            const form = document.getElementById('impact-form');
+            if (!form) return;
+            const impactRef = doc(db, "settings", "impact");
+            const impactSnap = await getDoc(impactRef);
+            if (impactSnap.exists()) {
+                const data = impactSnap.data();
+                form.mealsServed.value = data.mealsServed || 0;
+                form.studentsEducated.value = data.studentsEducated || 0;
+                form.volunteersEngaged.value = data.volunteersEngaged || 0;
             }
         };
 
@@ -1636,6 +1779,22 @@
                 showModal("Banner updated successfully!");
             } catch (error) {
                 showModal("Error updating banner: " + error.message);
+            }
+        };
+
+        const handleImpactUpdate = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const impactData = {
+                mealsServed: Number(form.mealsServed.value),
+                studentsEducated: Number(form.studentsEducated.value),
+                volunteersEngaged: Number(form.volunteersEngaged.value)
+            };
+            try {
+                await setDoc(doc(db, "settings", "impact"), impactData);
+                showModal("Impact stats updated successfully!");
+            } catch (error) {
+                showModal("Error updating impact stats: " + error.message);
             }
         };
 
@@ -2000,7 +2159,12 @@
                 // Initial page load based on URL hash
                 const initialPage = window.location.hash.substring(1) || 'home';
                 loadLogo();
-                navigateTo(initialPage);
+                await navigateTo(initialPage);
+                
+                // Make content visible after initial load
+                mainContent.style.visibility = 'visible';
+                document.querySelector('footer').style.visibility = 'visible';
+                
                 renderSocialLinks();
                 
                 // --- Initialize Live Features ---
