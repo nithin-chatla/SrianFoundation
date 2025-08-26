@@ -23,6 +23,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
+    <!-- PDF & Image Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         :root {
             --background-main: #fdfcfa;
@@ -459,8 +463,8 @@
         const goalModalContent = document.getElementById('goal-modal-content');
 
         const showModal = (message, content = '') => {
-            modalMessage.textContent = message;
-            modalButtons.innerHTML = content + `<button id="modal-close-button" class="bg-[var(--primary)] text-white font-semibold px-6 py-2 rounded-full hover:opacity-90 transition-colors">Close</button>`;
+            modalMessage.innerHTML = message;
+            modalButtons.innerHTML = content + `<button id="modal-close-button" class="bg-[var(--primary)] text-white font-semibold px-6 py-2 rounded-full hover:opacity-90 transition-colors mt-4">Close</button>`;
             modal.classList.add('visible');
             document.getElementById('modal-close-button').addEventListener('click', hideModal);
         };
@@ -1576,7 +1580,7 @@
                 container.innerHTML = `<table class="w-full text-left text-sm">
                     <thead>
                         <tr class="border-b">
-                            <th class="p-2">Name</th><th class="p-2">Phone</th><th class="p-2">Amount</th><th class="p-2">Action</th>
+                            <th class="p-2">Name</th><th class="p-2">Phone</th><th class="p-2">Amount</th><th class="p-2">Donation Type</th><th class="p-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1587,6 +1591,7 @@
                             <td class="p-2">${pledge.name}</td>
                             <td class="p-2">${pledge.phone}</td>
                             <td class="p-2">₹${pledge.amount.toLocaleString('en-IN')}</td>
+                            <td class="p-2">${pledge.goalTitle || 'General Donation'}</td>
                             <td class="p-2">
                                 <button data-id="${doc.id}" class="delete-pledge-btn text-red-500 hover:text-red-700">Delete</button>
                             </td>
@@ -1614,7 +1619,12 @@
             const searchInput = document.getElementById('admin-pledge-search');
             searchInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
-                const filteredPledges = allPledges.filter(doc => doc.data().name.toLowerCase().includes(searchTerm) || doc.data().phone.includes(searchTerm));
+                const filteredPledges = allPledges.filter(doc => {
+                    const data = doc.data();
+                    return data.name.toLowerCase().includes(searchTerm) || 
+                           data.phone.includes(searchTerm) ||
+                           (data.goalTitle && data.goalTitle.toLowerCase().includes(searchTerm));
+                });
                 renderTable(filteredPledges);
             });
 
@@ -1702,6 +1712,8 @@
 
             const name = form.name.value;
             const amount = form.amount.value;
+            const goalId = form.goal.value;
+            const goalText = form.goal.options[form.goal.selectedIndex].text;
 
             try {
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -1711,6 +1723,8 @@
                     email: form.email.value,
                     phone: form.phone.value,
                     amount: Number(amount),
+                    goalId: goalId,
+                    goalTitle: goalId ? goalText : "General Donation",
                     timestamp: new Date()
                 });
                 
